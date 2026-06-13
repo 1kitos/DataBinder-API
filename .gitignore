@@ -1,39 +1,36 @@
-HELP.md
+# Maven
 target/
+*.class
+*.jar
+*.war
+*.ear
+
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
-.apt_generated
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
 .classpath
-.factorypath
 .project
 .settings
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# VS Code
+.vscode/
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
-.vscode/
-
-
-# Environment / secrets
+# Env / secrets
 .env
 *.env
 application-local.properties
@@ -41,6 +38,6 @@ application-local.properties
 # Logs
 *.log
 
-# OS noise
+# OS
 .DS_Store
 Thumbs.db
