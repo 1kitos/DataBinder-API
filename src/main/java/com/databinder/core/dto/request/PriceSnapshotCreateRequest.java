@@ -1,7 +1,6 @@
 package com.databinder.core.dto.request;
 
 import java.math.BigDecimal;
-
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +16,10 @@ public class PriceSnapshotCreateRequest {
 
     @NotNull
     @DecimalMin("0.00")
-    private BigDecimal price;
+    private BigDecimal fromPrice;
+
+    @DecimalMin("0.00")
+    private BigDecimal priceTrend;
 
     @NotBlank
     private String currency;

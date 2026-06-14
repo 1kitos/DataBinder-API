@@ -17,14 +17,20 @@ public class PriceSnapshot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal fromPrice;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal priceTrend;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal customPrice; // lógica a implementar depois
 
     private String currency;
 
     private Instant timestamp;
 
     @ManyToOne
-    @JoinColumn(name = "printing_id", nullable = false)
+    @JoinColumn(name = "printing_id", nullable = true)
     private Printing printing;
 }

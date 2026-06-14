@@ -42,4 +42,12 @@ public class PriceController {
     public void delete(@PathVariable Long id) {
         priceService.delete(id);
     }
+    
+    @PostMapping("/snapshot")
+    public PriceSnapshotResponse snapshot(@RequestParam String game,
+                                        @RequestParam String set,
+                                        @RequestParam String cardName) {
+
+        return priceService.getSnapshotForCard(game, set, cardName);
+    }
 }

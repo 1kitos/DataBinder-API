@@ -27,4 +27,12 @@ public class Card {
     @JsonIgnore
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL)
     private List<Printing> printings;
+    
+    
+    public String toCardmarketSlug() {
+        return name
+            .replaceAll("[^a-zA-Z0-9\\s]", "")
+            .trim()
+            .replaceAll("\\s+", "-");
+    }
 }
