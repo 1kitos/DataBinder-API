@@ -12,4 +12,6 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     Optional<Card> findByNameIgnoreCase(String name);
 
     List<Card> findByNameContainingIgnoreCase(String name);
+    
+    Optional<Card> findByName(String name);
 }

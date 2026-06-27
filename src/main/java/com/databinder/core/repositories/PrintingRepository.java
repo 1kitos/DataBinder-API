@@ -1,5 +1,7 @@
 package com.databinder.core.repositories;
 
+import com.databinder.core.entities.Card;
+import com.databinder.core.entities.CardSet;
 import com.databinder.core.entities.Printing;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,4 +19,6 @@ public interface PrintingRepository extends JpaRepository<Printing, Long> {
             Long cardSetId,
             String collectorNumber
     );
+    
+    boolean existsByCardAndCardSet(Card card, CardSet cardSet);
 }
