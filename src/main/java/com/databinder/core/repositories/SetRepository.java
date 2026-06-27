@@ -11,4 +11,6 @@ public interface SetRepository extends JpaRepository<CardSet, Long> {
     Optional<CardSet> findByCodeIgnoreCase(String code);
 
     Optional<CardSet> findByNameIgnoreCase(String name);
+    
+    Optional<CardSet> findByCode(String code);
 }
