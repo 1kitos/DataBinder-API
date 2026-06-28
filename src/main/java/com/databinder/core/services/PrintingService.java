@@ -36,6 +36,7 @@ public class PrintingService {
         printing.setCardSet(cardSet);
         printing.setCollectorNumber(request.getCollectorNumber());
         printing.setImageUrl(request.getImageUrl());
+        printing.setRarity(request.getRarity()); // <-- Add this line
 
         return toResponse(printingRepository.save(printing));
     }
@@ -64,7 +65,8 @@ public class PrintingService {
                 printing.getCard().getId(),
                 printing.getCardSet().getId(),
                 printing.getCollectorNumber(),
-                printing.getImageUrl()
+                printing.getImageUrl(),
+                printing.getRarity()
         );
     }
 }

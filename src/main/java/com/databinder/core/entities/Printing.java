@@ -19,6 +19,8 @@ public class Printing {
     private String collectorNumber;
 
     private String imageUrl;
+    
+    private String rarity;
 
     @ManyToOne
     @JoinColumn(name = "card_id", nullable = false)
@@ -30,4 +32,5 @@ public class Printing {
 
     @OneToMany(mappedBy = "printing", cascade = CascadeType.ALL)
     private List<PriceSnapshot> priceSnapshots;
+    
 }

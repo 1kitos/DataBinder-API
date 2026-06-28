@@ -12,4 +12,5 @@ public class PrintingResponse {
     private Long setId;
     private String collectorNumber;
     private String imageUrl;
+    private String rarity;
 }
