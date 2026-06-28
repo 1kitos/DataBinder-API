@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -70,28 +69,33 @@ public class YugiohConfigService {
 
         if (root == null || !root.has("data")) return;
 
-        // carrega em memória
+        // 1. Load everything into memory maps
         Map<String, Card> cardsByName = cardRepository.findAll()
             .stream().collect(Collectors.toMap(Card::getName, c -> c));
 
         Map<String, CardSet> setsByCode = cardSetRepository.findAll()
             .stream().collect(Collectors.toMap(CardSet::getCode, s -> s));
 
-        List<Card> newCards = new ArrayList<>();
-        List<CardSet> newSets = new ArrayList<>();
+        List<Card> cardsToPersist = new ArrayList<>();
+        List<CardSet> setsToPersist = new ArrayList<>();
 
-        // 1o passe — cartas e sets
+        // 1st Pass — Upsert Cards and Sets
         for (JsonNode cardNode : root.get("data")) {
             String name = cardNode.get("name").asText();
             String oracleText = cardNode.has("desc") ? cardNode.get("desc").asText() : null;
 
-            cardsByName.computeIfAbsent(name, n -> {
-                Card c = new Card();
-                c.setName(n);
-                c.setOracleText(oracleText);
-                newCards.add(c);
-                return c;
-            });
+            Card card = cardsByName.get(name);
+            if (card == null) {
+                card = new Card();
+                card.setName(name);
+                card.setOracleText(oracleText);
+                cardsByName.put(name, card);
+                cardsToPersist.add(card);
+            } else {
+                // Future-proofing: Update existing card fields if they changed
+                card.setOracleText(oracleText);
+                cardsToPersist.add(card); 
+            }
 
             if (!cardNode.has("card_sets")) continue;
 
@@ -100,35 +104,43 @@ public class YugiohConfigService {
                 String setCode = code.contains("-") ? code.substring(0, code.indexOf("-")) : code;
                 String setName = setNode.get("set_name").asText();
 
-                setsByCode.computeIfAbsent(setCode, sc -> {
-                    CardSet cs = new CardSet();
-                    cs.setName(setName);
-                    cs.setCode(sc);
-                    cs.setGame(Game.YUGIOH);
-                    newSets.add(cs);
-                    return cs;
-                });
+                CardSet cardSet = setsByCode.get(setCode);
+                if (cardSet == null) {
+                    cardSet = new CardSet();
+                    cardSet.setName(setName);
+                    cardSet.setCode(setCode);
+                    cardSet.setGame(Game.YUGIOH);
+                    setsByCode.put(setCode, cardSet);
+                    setsToPersist.add(cardSet);
+                } else {
+                    // Update field if needed
+                    cardSet.setName(setName);
+                    setsToPersist.add(cardSet);
+                }
             }
         }
 
-        // persiste cartas e sets — todos têm ID a partir daqui
-        cardRepository.saveAll(newCards);
-        cardSetRepository.saveAll(newSets);
+        // Persist Cards and Sets so they definitely have IDs for the next phase
+        cardRepository.saveAll(cardsToPersist);
+        cardSetRepository.saveAll(setsToPersist);
 
-        // carrega printings existentes em memória
-        Set<String> existingPrintings = printingRepository.findAll()
+        // 2. Load existing printings into a map using the compound key
+        Map<String, Printing> existingPrintingsMap = printingRepository.findAll()
             .stream()
-            .map(p -> p.getCard().getId() + "-" + p.getCardSet().getId())
-            .collect(Collectors.toSet());
+            .collect(Collectors.toMap(
+                p -> p.getCard().getId() + "-" + p.getCardSet().getId(),
+                p -> p,
+                (existing, replacement) -> existing // Fallback merger function
+            ));
 
-        List<Printing> newPrintings = new ArrayList<>();
+        List<Printing> printingsToPersist = new ArrayList<>();
 
-        // 2o passe — printings
+        // 2nd Pass — Upsert Printings
         for (JsonNode cardNode : root.get("data")) {
             String name = cardNode.get("name").asText();
             Card card = cardsByName.get(name);
 
-            if (!cardNode.has("card_sets")) continue;
+            if (!cardNode.has("card_sets") || card == null) continue;
 
             String imageUrl = cardNode.has("card_images")
                 ? cardNode.get("card_images").get(0).get("image_url").asText()
@@ -139,22 +151,38 @@ public class YugiohConfigService {
                 String setCode = code.contains("-") ? code.substring(0, code.indexOf("-")) : code;
                 CardSet cardSet = setsByCode.get(setCode);
 
+                if (cardSet == null) continue;
+
+                String rarity = setNode.has("set_rarity") ? setNode.get("set_rarity").asText() : null;
                 String key = card.getId() + "-" + cardSet.getId();
-                if (!existingPrintings.contains(key)) {
-                    Printing printing = new Printing();
+
+                Printing printing = existingPrintingsMap.get(key);
+                
+                if (printing == null) {
+                    // Create new printing if it doesn't exist
+                    printing = new Printing();
                     printing.setCard(card);
                     printing.setCardSet(cardSet);
-                    printing.setCollectorNumber(code);
-                    printing.setImageUrl(imageUrl);
-                    newPrintings.add(printing);
-                    existingPrintings.add(key);
+                    existingPrintingsMap.put(key, printing);
                 }
+                
+                // --- Dynamic Field Alignment ---
+                // This updates old records with missing rarities AND saves new records!
+                printing.setCollectorNumber(code);
+                printing.setImageUrl(imageUrl);
+                printing.setRarity(rarity); 
+                
+                // Add any future entity properties here:
+                // printing.setSomeFutureField(setNode.get("future").asText());
+
+                printingsToPersist.add(printing);
             }
         }
 
-        printingRepository.saveAll(newPrintings);
+        // Saves everything (executes INSERTs for new ones and UPDATEs for existing ones)
+        printingRepository.saveAll(printingsToPersist);
 
-        // atualiza versão
+        // 3. Update Database Version Tracker
         if (versionNode != null && versionNode.has("database_version")) {
             String remoteVersion = versionNode.get("database_version").asText();
             DbVersion dbVersion = dbVersionRepository.findByGame(Game.YUGIOH)
