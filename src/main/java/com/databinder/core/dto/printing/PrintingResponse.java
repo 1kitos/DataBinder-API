@@ -13,4 +13,5 @@ public class PrintingResponse {
     private String collectorNumber;
     private String imageUrl;
     private String rarity;
+    private String isPromo;
 }

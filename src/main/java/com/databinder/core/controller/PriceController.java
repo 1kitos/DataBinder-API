@@ -2,6 +2,7 @@ package com.databinder.core.controller;
 
 import com.databinder.core.dto.price.PriceSnapshotResponse;
 import com.databinder.core.dto.request.PriceSnapshotCreateRequest;
+import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.services.PriceService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -44,7 +45,7 @@ public class PriceController {
     }
     
     @PostMapping("/snapshot")
-    public PriceSnapshotResponse snapshot(@RequestParam String game,
+    public PriceSnapshotResponse snapshot(@RequestParam Game game,
                                         @RequestParam String set,
                                         @RequestParam String cardName) {
 

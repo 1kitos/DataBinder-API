@@ -21,6 +21,8 @@ public class Printing {
     private String imageUrl;
     
     private String rarity;
+    
+    private String isPromo;
 
     @ManyToOne
     @JoinColumn(name = "card_id", nullable = false)

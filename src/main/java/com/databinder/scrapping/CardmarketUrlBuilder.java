@@ -9,13 +9,13 @@ import com.databinder.core.entities.Printing;
 @Component
 public class CardmarketUrlBuilder {
 
-	@Value("${cardmarket.base-url}")
+    @Value("${cardmarket.base-url}")
     private String baseUrl;
 
-    public String buildSinglesUrl(String game, String setName, String cardName) {
+    public String buildSinglesUrl(Game game, String setName, String cardName) {
         return String.format("%s/%s/Products/Singles/%s/%s",
-        	baseUrl,
-            formatSlug(game),
+            baseUrl,
+            game.getCardmarketPath(),
             formatSlug(setName),
             formatSlug(cardName));
     }
@@ -26,6 +26,4 @@ public class CardmarketUrlBuilder {
             .trim()
             .replaceAll("\\s+", "-");
     }
-
-
 }

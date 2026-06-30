@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.databinder.core.dto.price.PriceSnapshotResponse;
 import com.databinder.core.dto.request.PriceSnapshotCreateRequest;
+import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.entities.PriceSnapshot;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.exception.ResourceNotFoundException;
@@ -62,20 +63,44 @@ public class PriceService {
     }
     
     
-    public PriceSnapshotResponse getSnapshotForCard(String game, String set, String cardName)
-    {
-    	PriceSnapshot result = new PriceSnapshot(); 
-    	
-    	String cmUrl = cardmarketUrlBuilder.buildSinglesUrl(game, set, cardName);
-    	CardmarketPriceData priceData = cardmarketScrapingService.fetchPrices(cmUrl);
-    	
-    	result.setFromPrice(priceData.fromPrice());
-    	result.setPriceTrend(priceData.priceTrend());
-    	result.setCurrency("EUR");
-    	result.setTimestamp(Instant.now());
-    	
-    	return toResponse(result);
+    public PriceSnapshotResponse getSnapshotForCard(Game game, String set, String cardName) {
+        PriceSnapshot result = new PriceSnapshot();
+
+        String cmUrl = cardmarketUrlBuilder.buildSinglesUrl(game, set, cardName);
+        CardmarketPriceData priceData = cardmarketScrapingService.fetchPrices(cmUrl);
+
+        result.setFromPrice(priceData.fromPrice());
+        result.setPriceTrend(priceData.priceTrend());
+        result.setCurrency("EUR");
+        result.setTimestamp(Instant.now());
+
+        return toResponse(result);
     }
+    
+    
+    public PriceSnapshotResponse fetchAndSaveSnapshot(Long printingId) {
+        Printing printing = printingRepository.findById(printingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Printing not found: " + printingId));
+
+        String cmUrl = cardmarketUrlBuilder.buildSinglesUrl(
+                printing.getCardSet().getGame(),
+                printing.getCardSet().getName(),
+                printing.getCard().getName()
+        );
+
+        CardmarketPriceData priceData = cardmarketScrapingService.fetchPrices(cmUrl);
+
+        PriceSnapshot snapshot = new PriceSnapshot();
+        snapshot.setPrinting(printing);
+        snapshot.setFromPrice(priceData.fromPrice());
+        snapshot.setPriceTrend(priceData.priceTrend());
+        snapshot.setCurrency("EUR");
+        snapshot.setTimestamp(Instant.now());
+
+        return toResponse(priceSnapshotRepository.save(snapshot));
+    }
+    
+    
     
     
 
