@@ -1,5 +1,6 @@
 package com.databinder.scrapping;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,27 +25,26 @@ public class CardmarketScrapingService {
     @Value("${scraper.base-url}")
     private String scraperBaseUrl;
 
-    ExchangeStrategies strategies = ExchangeStrategies.builder()
-    	    .codecs(configurer -> configurer.defaultCodecs()
-    	        .maxInMemorySize(10 * 1024 * 1024)) // 10MB
-    	    .build();
-
-    	private final WebClient webClient = WebClient.builder()
-    	    .exchangeStrategies(strategies)
-    	    .build();
-    	
+    private final WebClient webClient;
     private final CardmarketPriceParser priceParser;
+
+    @Autowired
+    public CardmarketScrapingService(CardmarketPriceParser priceParser) {
+        this.priceParser = priceParser;
+        this.webClient = WebClient.builder()
+            .exchangeStrategies(ExchangeStrategies.builder()
+                .codecs(c -> c.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build())
+            .build();
+    }
 
     public CardmarketPriceData fetchPrices(String url) {
         String html = webClient.get()
-        	    .uri(scraperBaseUrl + "/scrape?url=" + url)
-        	    .retrieve()
-        	    .bodyToMono(String.class)
-        	    .block();
-        
-        System.out.println(html.contains("Price Trend"));
-        System.out.println(html.contains("From"));
-        
+            .uri(scraperBaseUrl + "/scrape?url=" + url)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
+
         return priceParser.parse(html);
     }
 }

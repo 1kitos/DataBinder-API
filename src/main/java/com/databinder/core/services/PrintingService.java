@@ -66,7 +66,8 @@ public class PrintingService {
                 printing.getCardSet().getId(),
                 printing.getCollectorNumber(),
                 printing.getImageUrl(),
-                printing.getRarity()
+                printing.getRarity(),
+                printing.getIsPromo()
         );
     }
 }

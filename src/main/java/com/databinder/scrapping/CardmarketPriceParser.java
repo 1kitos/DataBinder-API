@@ -11,58 +11,39 @@ import java.math.BigDecimal;
 @Component
 public class CardmarketPriceParser {
 
-	public CardmarketPriceData parse(String html) {
+    public CardmarketPriceData parse(String html) {
+        Document doc = Jsoup.parse(html);
+        BigDecimal fromPrice = null;
+        BigDecimal priceTrend = null;
 
-	    Document doc = Jsoup.parse(html);
+        for (Element dt : doc.select("dt")) {
+            String label = dt.text().trim().toLowerCase();
+            Element dd = dt.nextElementSibling();
+            if (dd == null || !dd.tagName().equals("dd")) continue;
 
-	    BigDecimal fromPrice = null;
-	    BigDecimal priceTrend = null;
+            BigDecimal value = parseSafe(clean(dd.text()));
 
-	    for (Element dt : doc.select("dt")) {
+            if (label.equals("from")) {
+                fromPrice = value;
+            } else if (label.contains("price trend")) {
+                priceTrend = value;
+            }
+        }
 
-	        String label = dt.text().trim().toLowerCase();
+        return new CardmarketPriceData(fromPrice, priceTrend);
+    }
 
-	        Element dd = dt.nextElementSibling();
-	        if (dd == null || !dd.tagName().equals("dd")) continue;
-
-	        String valueText = dd.text()
-	            .replace("€", "")
-	            .replace("\u00A0", " ")
-	            .replace(",", ".")
-	            .replaceAll("[^0-9.]", "")
-	            .trim();
-
-	        BigDecimal value;
-	        try {
-	            value = valueText.isEmpty() ? null : new BigDecimal(valueText);
-	        } catch (Exception e) {
-	            continue;
-	        }
-
-	        if (label.equals("from")) {
-	            fromPrice = value;
-	        }
-
-	        if (label.contains("price trend")) {
-	            priceTrend = value;
-	        }
-	    }
-
-	    return new CardmarketPriceData(fromPrice, priceTrend);
-	}
-
-	private String clean(String raw) {
-	    return raw
-	        .replace("€", "")
-	        .replace(",", ".")
-	        .replace("\u00A0", " ")
-	        .replaceAll("[^0-9.]", "")
-	        .trim();
-	}
+    private String clean(String raw) {
+        return raw
+            .replace("€", "")
+            .replace(",", ".")
+            .replace("\u00A0", " ")
+            .replaceAll("[^0-9.]", "")
+            .trim();
+    }
 
     private BigDecimal parseSafe(String raw) {
         if (raw == null || raw.isBlank()) return null;
-
         try {
             return new BigDecimal(raw);
         } catch (Exception e) {
