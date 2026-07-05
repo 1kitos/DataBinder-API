@@ -39,12 +39,10 @@ public class CardmarketScrapingService {
     }
 
     public CardmarketPriceData fetchPrices(String url) {
-        String html = webClient.get()
+        return webClient.get()
             .uri(scraperBaseUrl + "/scrape?url=" + url)
             .retrieve()
-            .bodyToMono(String.class)
+            .bodyToMono(CardmarketPriceData.class)
             .block();
-
-        return priceParser.parse(html);
     }
 }

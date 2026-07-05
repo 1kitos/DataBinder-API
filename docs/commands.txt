@@ -1,0 +1,4 @@
+POSTGRES
+
+--ABRIR
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U admin -d databinder -p 5433

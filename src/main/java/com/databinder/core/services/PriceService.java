@@ -63,18 +63,17 @@ public class PriceService {
     }
     
     
-    public PriceSnapshotResponse getSnapshotForCard(Game game, String set, String cardName) {
-        PriceSnapshot result = new PriceSnapshot();
-
-        String cmUrl = cardmarketUrlBuilder.buildSinglesUrl(game, set, cardName);
+    public PriceSnapshotResponse getSnapshotForCard(Game game, String set, String cardName, String rarity) {
+        String cmUrl = cardmarketUrlBuilder.buildSinglesUrl(game, set, cardName, rarity);
         CardmarketPriceData priceData = cardmarketScrapingService.fetchPrices(cmUrl);
 
+        PriceSnapshot result = new PriceSnapshot();
         result.setFromPrice(priceData.fromPrice());
         result.setPriceTrend(priceData.priceTrend());
         result.setCurrency("EUR");
         result.setTimestamp(Instant.now());
 
-        return toResponse(result);
+        return toResponse(priceSnapshotRepository.save(result)); // se quiseres persistir
     }
     
     
@@ -85,7 +84,8 @@ public class PriceService {
         String cmUrl = cardmarketUrlBuilder.buildSinglesUrl(
                 printing.getCardSet().getGame(),
                 printing.getCardSet().getName(),
-                printing.getCard().getName()
+                printing.getCard().getName(),
+                printing.getRarity()
         );
 
         CardmarketPriceData priceData = cardmarketScrapingService.fetchPrices(cmUrl);

@@ -11,27 +11,27 @@ import java.math.BigDecimal;
 @Component
 public class CardmarketPriceParser {
 
-    public CardmarketPriceData parse(String html) {
-        Document doc = Jsoup.parse(html);
-        BigDecimal fromPrice = null;
-        BigDecimal priceTrend = null;
-
-        for (Element dt : doc.select("dt")) {
-            String label = dt.text().trim().toLowerCase();
-            Element dd = dt.nextElementSibling();
-            if (dd == null || !dd.tagName().equals("dd")) continue;
-
-            BigDecimal value = parseSafe(clean(dd.text()));
-
-            if (label.equals("from")) {
-                fromPrice = value;
-            } else if (label.contains("price trend")) {
-                priceTrend = value;
-            }
-        }
-
-        return new CardmarketPriceData(fromPrice, priceTrend);
-    }
+//    public CardmarketPriceData parse(String html) {
+//        Document doc = Jsoup.parse(html);
+//        BigDecimal fromPrice = null;
+//        BigDecimal priceTrend = null;
+//
+//        for (Element dt : doc.select("dt")) {
+//            String label = dt.text().trim().toLowerCase();
+//            Element dd = dt.nextElementSibling();
+//            if (dd == null || !dd.tagName().equals("dd")) continue;
+//
+//            BigDecimal value = parseSafe(clean(dd.text()));
+//
+//            if (label.equals("from")) {
+//                fromPrice = value;
+//            } else if (label.contains("price trend")) {
+//                priceTrend = value;
+//            }
+//        }
+//
+//        return new CardmarketPriceData(fromPrice, priceTrend);
+//    }
 
     private String clean(String raw) {
         return raw
