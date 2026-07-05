@@ -5,6 +5,7 @@ import com.databinder.core.dto.printing.PrintingResponse;
 import com.databinder.core.dto.request.PrintingCreateRequest;
 import com.databinder.core.entities.Card;
 import com.databinder.core.entities.CardSet;
+import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.exception.ResourceNotFoundException;
 import com.databinder.core.repositories.CardRepository;
@@ -13,6 +14,7 @@ import com.databinder.core.repositories.SetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -54,9 +56,25 @@ public class PrintingService {
                 .map(this::toResponse)
                 .toList();
     }
+    
+    
+    public List<Printing> getAllPrintingsFromCardAndSet(String cardname, String setName, Game game)
+    {
+    	List<Printing> result = new ArrayList<Printing>();  	
+    	result = printingRepository.findPrintingsOrdered(game.name(), cardname, setName);
+    	   	
+    	return result;
+    }
 
     public void delete(Long id) {
         printingRepository.deleteById(id);
+    }
+    
+    private static String normalizeCardName(String name) {
+        return name
+                .replace("<", "")
+                .replace(">", "")
+                .trim();
     }
 
     private PrintingResponse toResponse(Printing printing) {

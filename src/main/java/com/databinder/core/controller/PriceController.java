@@ -47,8 +47,14 @@ public class PriceController {
     @PostMapping("/snapshot")
     public PriceSnapshotResponse snapshot(@RequestParam Game game,
                                         @RequestParam String set,
-                                        @RequestParam String cardName) {
+                                        @RequestParam String cardName,
+                                        @RequestParam(required = false) String rarity) {
 
-        return priceService.getSnapshotForCard(game, set, cardName);
+        return priceService.getSnapshotForCard(game, set, cardName, rarity);
+    }
+    
+    @PostMapping("/printings/{printingId}/fetch")
+    public PriceSnapshotResponse fetchAndSave(@PathVariable Long printingId) {
+        return priceService.fetchAndSaveSnapshot(printingId);
     }
 }

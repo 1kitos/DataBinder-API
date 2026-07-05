@@ -25,6 +25,12 @@ public interface PrintingRepository extends JpaRepository<Printing, Long> {
             String collectorNumber
     );
     
+    List<Printing> findByCard_NameIgnoreCaseAndCardSet_NameIgnoreCaseAndCardSet_Game(
+            String cardName,
+            String setName,
+            CardSet.Game game
+    );
+    
     boolean existsByCardAndCardSet(Card card, CardSet cardSet);
     
     @Query(value = """
@@ -54,6 +60,25 @@ public interface PrintingRepository extends JpaRepository<Printing, Long> {
         @Param("rarity") String rarity,
         Pageable pageable
     );
+    
+    
+    @Query(value = """
+    		SELECT p.*
+    		FROM printing p
+    		JOIN card c ON c.id = p.card_id
+    		JOIN sets s ON s.id = p.set_id
+    		LEFT JOIN rarities r
+    		       ON LOWER(r.name) = LOWER(p.rarity)
+    		      AND r.game = s.game
+    		WHERE c.name ILIKE :cardName
+    		AND s.name ILIKE :setName
+    		AND s.game = :game
+    		ORDER BY r.sort_order ASC NULLS LAST
+    		""", nativeQuery = true)
+    		List<Printing> findPrintingsOrdered(
+    		        @Param("game") String game,
+    		        @Param("cardName") String cardName,
+    		        @Param("setName") String setName);
     
     
 }
