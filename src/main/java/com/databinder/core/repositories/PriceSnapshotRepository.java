@@ -21,4 +21,6 @@ public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, Lo
     
    
     Optional<PriceSnapshot> findTopByPrintingIdOrderByTimestampDesc(Long printingId);
+    
+    List<PriceSnapshot> findTop2ByPrintingIdOrderByTimestampDesc(Long printingId);
 }

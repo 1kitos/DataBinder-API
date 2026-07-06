@@ -4,8 +4,10 @@ import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.PriceSnapshot;
 import com.databinder.core.entities.Watchlist;
 import com.databinder.core.entities.WatchlistItem;
+import com.databinder.core.enums.AlertType;
 import com.databinder.core.repositories.PriceSnapshotRepository;
 import com.databinder.core.repositories.WatchlistRepository;
+import com.databinder.core.services.MessageService;
 import com.databinder.core.services.PriceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ public class WatchlistScrapingScheduler {
     private final WatchlistRepository watchlistRepository;
     private final PriceSnapshotRepository priceSnapshotRepository;
     private final PriceService priceService;
+    private final MessageService messageService;
 
     @Value("${scraper.delay-ms:4000}")
     private long delayMs;
@@ -81,6 +84,15 @@ public class WatchlistScrapingScheduler {
             try {
                 priceService.fetchAndSaveSnapshot(printing.getId());
                 log.info("Snapshot criado com sucesso para printing {}", printing.getId());
+                
+                if (checkAlerts(item)) {
+                    messageService.createMessage(
+                        item.getWatchlist().getUser().getId(),
+                        "Price Drop!",
+                        item.getPrinting().getCard().getName() + " reached a new lowest price."
+                    );
+                }
+                
             } catch (Exception e) {
                 log.error("Falha ao fazer scraping da printing {}: {}", printing.getId(), e.getMessage());
             }
@@ -108,4 +120,30 @@ public class WatchlistScrapingScheduler {
             Thread.currentThread().interrupt();
         }
     }
+    
+    private boolean checkAlerts(WatchlistItem item) {
+
+        if (!Boolean.TRUE.equals(item.getAlertEnabled())) {
+            return false;
+        }
+
+        if (!item.getAlerts().contains(AlertType.NEW_LOWEST_PRICE)) {
+            return false;
+        }
+
+        List<PriceSnapshot> snapshots =
+                priceSnapshotRepository.findTop2ByPrintingIdOrderByTimestampDesc(
+                        item.getPrinting().getId());
+
+        if (snapshots.size() < 2) {
+            return false;
+        }
+
+        PriceSnapshot current = snapshots.get(0);
+        PriceSnapshot previous = snapshots.get(1);
+
+        return current.getFromPrice()
+                .compareTo(previous.getFromPrice()) < 0;
+    }
+    
 }
