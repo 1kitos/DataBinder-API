@@ -6,8 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.databinder.core.dto.card.CardResponse;
-import com.databinder.core.dto.printing.PrintingResponse;
+import com.databinder.core.dto.CardResponse;
+import com.databinder.core.dto.PrintingResponse;
 import com.databinder.core.entities.Card;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.CardSet.Game;

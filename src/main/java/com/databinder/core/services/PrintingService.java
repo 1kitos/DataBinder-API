@@ -1,7 +1,7 @@
 package com.databinder.core.services;
 
 
-import com.databinder.core.dto.printing.PrintingResponse;
+import com.databinder.core.dto.PrintingResponse;
 import com.databinder.core.dto.request.PrintingCreateRequest;
 import com.databinder.core.entities.Card;
 import com.databinder.core.entities.CardSet;

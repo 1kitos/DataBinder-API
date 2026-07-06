@@ -1,4 +1,4 @@
-package com.databinder.core.dto.printing;
+package com.databinder.core.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

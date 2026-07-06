@@ -1,7 +1,7 @@
 package com.databinder.core.controller;
 
+import com.databinder.core.dto.SetResponse;
 import com.databinder.core.dto.request.SetCreateRequest;
-import com.databinder.core.dto.set.SetResponse;
 import com.databinder.core.services.SetService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
