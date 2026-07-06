@@ -1,6 +1,6 @@
 package com.databinder.core.services;
 
-import com.databinder.core.dto.rarity.RarityResponse;
+import com.databinder.core.dto.RarityResponse;
 import com.databinder.core.dto.request.RarityCreateRequest;
 import com.databinder.core.entities.Rarity;
 import com.databinder.core.entities.CardSet.Game;

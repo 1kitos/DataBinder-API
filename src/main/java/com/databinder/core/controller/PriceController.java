@@ -1,6 +1,6 @@
 package com.databinder.core.controller;
 
-import com.databinder.core.dto.price.PriceSnapshotResponse;
+import com.databinder.core.dto.PriceSnapshotResponse;
 import com.databinder.core.dto.request.PriceSnapshotCreateRequest;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.services.PriceService;

@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.databinder.core.dto.SetResponse;
 import com.databinder.core.dto.request.SetCreateRequest;
-import com.databinder.core.dto.set.SetResponse;
 import com.databinder.core.entities.CardSet;
 import com.databinder.core.exception.ResourceNotFoundException;
 import com.databinder.core.repositories.SetRepository;

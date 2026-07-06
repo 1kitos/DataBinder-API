@@ -1,6 +1,6 @@
 package com.databinder.core.controller;
 
-import com.databinder.core.dto.printing.PrintingResponse;
+import com.databinder.core.dto.PrintingResponse;
 import com.databinder.core.dto.request.PrintingCreateRequest;
 import com.databinder.core.services.PrintingService;
 import io.swagger.v3.oas.annotations.tags.Tag;

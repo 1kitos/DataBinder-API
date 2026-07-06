@@ -1,7 +1,7 @@
 package com.databinder.core.services;
 
 
-import com.databinder.core.dto.card.CardResponse;
+import com.databinder.core.dto.CardResponse;
 import com.databinder.core.dto.request.CardCreateRequest;
 import com.databinder.core.entities.Card;
 import com.databinder.core.exception.ResourceNotFoundException;
