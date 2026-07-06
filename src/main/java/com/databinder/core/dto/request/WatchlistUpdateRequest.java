@@ -1,6 +1,6 @@
 package com.databinder.core.dto.request;
 
-import com.databinder.core.entities.ScrapeFrequency;
+import com.databinder.core.enums.ScrapeFrequency;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

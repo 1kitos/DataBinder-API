@@ -1,9 +1,12 @@
 package com.databinder.core.controller;
 
+import com.databinder.core.dto.WatchlistItemResponse;
 import com.databinder.core.dto.WatchlistResponse;
+import com.databinder.core.dto.request.UpdateWatchlistItemRequest;
 import com.databinder.core.dto.request.WatchlistCreateRequest;
 import com.databinder.core.dto.request.WatchlistItemCreateRequest;
 import com.databinder.core.dto.request.WatchlistUpdateRequest;
+import com.databinder.core.enums.AlertType;
 import com.databinder.core.services.WatchlistService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -55,4 +58,18 @@ public class WatchlistController {
     {
     	return watchlistService.update(request);
     }
+    
+    
+    @PatchMapping("/watchlist-item/{id}")
+    public WatchlistItemResponse updateWatchlistItem(
+            @PathVariable Long id,
+            @RequestBody UpdateWatchlistItemRequest request) {
+
+        return watchlistService.updateItem(
+                id,
+                request.getAlarmsToAdd(),
+                request.getAlarmsToRemove(),
+                request.getAlertEnabled());
+    }
+    
 }

@@ -9,6 +9,7 @@ import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.User;
 import com.databinder.core.entities.Watchlist;
 import com.databinder.core.entities.WatchlistItem;
+import com.databinder.core.enums.AlertType;
 import com.databinder.core.exception.ResourceNotFoundException;
 import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.UserRepository;
@@ -19,7 +20,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -115,14 +118,49 @@ public class WatchlistService {
         
         return toResponse(watchlistRepository.save(watchlist));
     }
+    
+    
+    public WatchlistItemResponse updateItem(Long Id,List<AlertType> alarmsToAdd,
+    									 	List<AlertType> alarmsToRemove,Boolean alertEnabled)
+    {
+    	WatchlistItem item = watchlistItemRepository.findById(Id)
+    			.orElseThrow(() -> new ResourceNotFoundException("Watchlist Item not found: " + Id));
+    	
+    	List<AlertType> alerts = (item.getAlerts() != null) ? item.getAlerts() : new ArrayList<AlertType>();
+    	
+    	
+    	
+    	for(AlertType a : alarmsToAdd)
+    	{
+    		if(alerts.contains(a))
+    		{
+    			continue;
+    		}
+    		alerts.add(a);
+    	}
+    	
+    	for (AlertType a : alarmsToRemove)
+    	{
+    		if(!alerts.contains(a))
+    		{
+    			continue;
+    		}
+    		alerts.remove(a);
+    	}
+    	
+    	item.setAlerts(alerts);
+    	
+    	if(alertEnabled != null)
+    	{
+    		item.setAlertEnabled(alertEnabled);
+    	}
+    	
+    	return toResponse(watchlistItemRepository.save(item));
+    }
 
     private WatchlistResponse toResponse(Watchlist watchlist) {
         List<WatchlistItemResponse> items = watchlist.getItems().stream()
-                .map(item -> new WatchlistItemResponse(
-                        item.getId(),
-                        item.getPrinting().getId(),
-                        item.getAddedAt()
-                ))
+                .map(this::toResponse)
                 .toList();
 
         return new WatchlistResponse(
@@ -131,6 +169,17 @@ public class WatchlistService {
                 watchlist.getName(),
                 watchlist.getCreatedAt(),
                 items
+        );
+    }
+
+    private WatchlistItemResponse toResponse(WatchlistItem watchlistItem) {
+        return new WatchlistItemResponse(
+                watchlistItem.getId(),
+                watchlistItem.getPrinting().getId(),
+                watchlistItem.getAddedAt(),
+                watchlistItem.getAlerts(),
+                watchlistItem.getAlertEnabled(),
+                watchlistItem.getAlertTriggered()
         );
     }
 }
