@@ -1,4 +1,4 @@
-package com.databinder.core.dto.rarity;
+package com.databinder.core.dto;
 
 import com.databinder.core.entities.CardSet.Game;
 import lombok.AllArgsConstructor;

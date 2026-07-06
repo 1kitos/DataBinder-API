@@ -3,7 +3,7 @@ package com.databinder.core.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import com.databinder.core.dto.rarity.RarityResponse;
+import com.databinder.core.dto.RarityResponse;
 import com.databinder.core.dto.request.RarityCreateRequest;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.services.RarityService;

@@ -3,8 +3,8 @@ package com.databinder.search.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import com.databinder.core.dto.card.CardResponse;
-import com.databinder.core.dto.printing.PrintingResponse;
+import com.databinder.core.dto.CardResponse;
+import com.databinder.core.dto.PrintingResponse;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.search.services.SearchService;
 

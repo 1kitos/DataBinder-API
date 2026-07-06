@@ -3,7 +3,7 @@ package com.databinder.core.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import com.databinder.core.dto.card.CardResponse;
+import com.databinder.core.dto.CardResponse;
 import com.databinder.core.dto.request.CardCreateRequest;
 import com.databinder.core.services.CardService;
 

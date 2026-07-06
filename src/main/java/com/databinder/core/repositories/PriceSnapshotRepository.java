@@ -6,6 +6,7 @@ import com.databinder.core.entities.PriceSnapshot;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, Long> {
 
@@ -17,4 +18,7 @@ public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, Lo
             Long printingId,
             Instant timestamp
     );
+    
+   
+    Optional<PriceSnapshot> findTopByPrintingIdOrderByTimestampDesc(Long printingId);
 }

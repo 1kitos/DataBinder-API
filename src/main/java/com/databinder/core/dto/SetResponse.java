@@ -1,4 +1,4 @@
-package com.databinder.core.dto.set;
+package com.databinder.core.dto;
 
 import lombok.*;
 
