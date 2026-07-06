@@ -25,6 +25,15 @@ public class Watchlist {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(nullable = false)
+    private boolean autoScrapeEnabled = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ScrapeFrequency scrapeFrequency = ScrapeFrequency.DAILY;
+
+    private Instant lastScrapedAt;
+
     private Instant createdAt;
 
     @OneToMany(mappedBy = "watchlist", cascade = CascadeType.ALL, orphanRemoval = true)

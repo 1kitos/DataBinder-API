@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface WatchlistRepository extends JpaRepository<Watchlist, Long> {
     List<Watchlist> findByUserId(Long userId);
+    List<Watchlist> findByAutoScrapeEnabledTrue();
 }

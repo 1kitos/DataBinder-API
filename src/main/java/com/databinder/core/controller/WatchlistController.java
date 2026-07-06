@@ -3,7 +3,7 @@ package com.databinder.core.controller;
 import com.databinder.core.dto.WatchlistResponse;
 import com.databinder.core.dto.request.WatchlistCreateRequest;
 import com.databinder.core.dto.request.WatchlistItemCreateRequest;
-
+import com.databinder.core.dto.request.WatchlistUpdateRequest;
 import com.databinder.core.services.WatchlistService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -48,5 +48,11 @@ public class WatchlistController {
     @DeleteMapping("/{id}/items/{itemId}")
     public void removeItem(@PathVariable Long id, @PathVariable Long itemId) {
         watchlistService.removeItem(id, itemId);
+    }
+    
+    @PatchMapping()
+    public WatchlistResponse update(@Valid @RequestBody WatchlistUpdateRequest request)
+    {
+    	return watchlistService.update(request);
     }
 }

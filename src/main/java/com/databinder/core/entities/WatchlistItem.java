@@ -24,6 +24,9 @@ public class WatchlistItem {
     @JoinColumn(name = "printing_id")
     private Printing printing;
 
+    @Column(nullable = false)
+    private boolean autoScrapeEnabled = true;
+
     private Instant addedAt;
 
     @PrePersist
