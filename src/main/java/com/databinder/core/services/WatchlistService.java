@@ -4,6 +4,7 @@ import com.databinder.core.dto.WatchlistItemResponse;
 import com.databinder.core.dto.WatchlistResponse;
 import com.databinder.core.dto.request.WatchlistCreateRequest;
 import com.databinder.core.dto.request.WatchlistItemCreateRequest;
+import com.databinder.core.dto.request.WatchlistUpdateRequest;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.User;
 import com.databinder.core.entities.Watchlist;
@@ -13,8 +14,11 @@ import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.UserRepository;
 import com.databinder.core.repositories.WatchlistItemRepository;
 import com.databinder.core.repositories.WatchlistRepository;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -89,6 +93,27 @@ public class WatchlistService {
     private Watchlist findWatchlistOrThrow(Long id) {
         return watchlistRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Watchlist not found: " + id));
+    }
+    
+    public WatchlistResponse update(WatchlistUpdateRequest request)
+    {
+    	Watchlist watchlist = findWatchlistOrThrow(request.getId());
+    	
+    	if(!request.getName().isBlank() && request.getName() != null)
+    	{
+    		watchlist.setName(request.getName());
+    	}
+    	
+        if (request.getFrequency() != null) {
+            watchlist.setScrapeFrequency(request.getFrequency());
+        }
+        
+        if(request.getAutoScrapeEnabled() != null)
+        {
+        	 watchlist.setAutoScrapeEnabled(request.getAutoScrapeEnabled());
+        }
+        
+        return toResponse(watchlistRepository.save(watchlist));
     }
 
     private WatchlistResponse toResponse(Watchlist watchlist) {
