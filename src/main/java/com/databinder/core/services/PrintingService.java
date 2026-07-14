@@ -1,6 +1,7 @@
 package com.databinder.core.services;
 
 
+import com.databinder.core.dto.PrintingDetailsResponse;
 import com.databinder.core.dto.PrintingResponse;
 import com.databinder.core.dto.request.PrintingCreateRequest;
 import com.databinder.core.entities.Card;
@@ -8,14 +9,18 @@ import com.databinder.core.entities.CardSet;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.exception.ResourceNotFoundException;
+import com.databinder.core.mapping.ResponseMapper;
 import com.databinder.core.repositories.CardRepository;
 import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.SetRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +29,7 @@ public class PrintingService {
     private final PrintingRepository printingRepository;
     private final CardRepository cardRepository;
     private final SetRepository setRepository;
+
 
     public PrintingResponse create(PrintingCreateRequest request) {
 
@@ -40,20 +46,20 @@ public class PrintingService {
         printing.setImageUrl(request.getImageUrl());
         printing.setRarity(request.getRarity()); // <-- Add this line
 
-        return toResponse(printingRepository.save(printing));
+        return ResponseMapper.toResponse(printingRepository.save(printing));
     }
 
     public PrintingResponse getById(Long id) {
         Printing printing = printingRepository.findById(id)
         		.orElseThrow(() -> new ResourceNotFoundException("Printing not found: " + id));
 
-        return toResponse(printing);
+        return ResponseMapper.toResponse(printing);
     }
 
     public List<PrintingResponse> getAll() {
         return printingRepository.findAll()
                 .stream()
-                .map(this::toResponse)
+                .map(ResponseMapper::toResponse)
                 .toList();
     }
     
@@ -77,15 +83,5 @@ public class PrintingService {
                 .trim();
     }
 
-    private PrintingResponse toResponse(Printing printing) {
-        return new PrintingResponse(
-                printing.getId(),
-                printing.getCard().getId(),
-                printing.getCardSet().getId(),
-                printing.getCollectorNumber(),
-                printing.getImageUrl(),
-                printing.getRarity(),
-                printing.getIsPromo()
-        );
-    }
-}
+
+ }

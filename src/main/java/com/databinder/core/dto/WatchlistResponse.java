@@ -6,6 +6,8 @@ import lombok.Getter;
 import java.time.Instant;
 import java.util.List;
 
+import com.databinder.core.enums.ScrapeFrequency;
+
 @Getter
 @AllArgsConstructor
 public class WatchlistResponse {
@@ -13,5 +15,7 @@ public class WatchlistResponse {
     private Long userId;
     private String name;
     private Instant createdAt;
+    private ScrapeFrequency scrapeFrequency;
+    private Boolean autoScrapeEnabled;
     private List<WatchlistItemResponse> items;
 }

@@ -10,6 +10,8 @@ public class PrintingResponse {
     private Long id;
     private Long cardId;
     private Long setId;
+    private String setName;
+    private String setCode;
     private String collectorNumber;
     private String imageUrl;
     private String rarity;
