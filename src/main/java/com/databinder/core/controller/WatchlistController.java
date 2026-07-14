@@ -1,5 +1,6 @@
 package com.databinder.core.controller;
 
+import com.databinder.core.dto.WatchlistItemDetailsResponse;
 import com.databinder.core.dto.WatchlistItemResponse;
 import com.databinder.core.dto.WatchlistResponse;
 import com.databinder.core.dto.request.UpdateWatchlistItemRequest;
@@ -59,6 +60,10 @@ public class WatchlistController {
     	return watchlistService.update(request);
     }
     
+    @GetMapping("/watchlist-item/{id}")
+    public WatchlistItemResponse getWatchlistItem(@PathVariable Long id) {
+        return watchlistService.getItem(id);
+    }
     
     @PatchMapping("/watchlist-item/{id}")
     public WatchlistItemResponse updateWatchlistItem(
@@ -70,6 +75,13 @@ public class WatchlistController {
                 request.getAlarmsToAdd(),
                 request.getAlarmsToRemove(),
                 request.getAlertEnabled());
+    }
+    
+    @GetMapping("/watchlist-item/{id}/details")
+    public List<WatchlistItemDetailsResponse> getWatchlistItemDetails(@PathVariable Long id)
+    {
+    	
+    	return watchlistService.getItemDetailsForWatchlist(id);
     }
     
 }

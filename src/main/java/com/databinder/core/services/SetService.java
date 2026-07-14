@@ -8,6 +8,7 @@ import com.databinder.core.dto.SetResponse;
 import com.databinder.core.dto.request.SetCreateRequest;
 import com.databinder.core.entities.CardSet;
 import com.databinder.core.exception.ResourceNotFoundException;
+import com.databinder.core.mapping.ResponseMapper;
 import com.databinder.core.repositories.SetRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -23,20 +24,20 @@ public class SetService {
         cardSet.setName(request.getName());
         cardSet.setCode(request.getCode());
 
-        return toResponse(setRepository.save(cardSet));
+        return ResponseMapper.toResponse(setRepository.save(cardSet));
     }
 
     public SetResponse getById(Long id) {
         CardSet cardSet = setRepository.findById(id)
         		.orElseThrow(() -> new ResourceNotFoundException("CardSet not found: " + id));
 
-        return toResponse(cardSet);
+        return ResponseMapper.toResponse(cardSet);
     }
 
     public List<SetResponse> getAll() {
         return setRepository.findAll()
                 .stream()
-                .map(this::toResponse)
+                .map(ResponseMapper::toResponse)
                 .toList();
     }
 
@@ -47,18 +48,12 @@ public class SetService {
         cardSet.setName(request.getName());
         cardSet.setCode(request.getCode());
 
-        return toResponse(setRepository.save(cardSet));
+        return ResponseMapper.toResponse(setRepository.save(cardSet));
     }
 
     public void delete(Long id) {
         setRepository.deleteById(id);
     }
 
-    private SetResponse toResponse(CardSet cardSet) {
-        return new SetResponse(
-                cardSet.getId(),
-                cardSet.getName(),
-                cardSet.getCode()
-        );
-    }
+
 }

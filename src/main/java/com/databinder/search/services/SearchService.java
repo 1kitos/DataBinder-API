@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.databinder.core.dto.CardResponse;
+import com.databinder.core.dto.CardSearchResponse;
+import com.databinder.core.dto.PagedResponse;
 import com.databinder.core.dto.PrintingResponse;
 import com.databinder.core.entities.Card;
 import com.databinder.core.entities.Printing;
@@ -23,36 +25,25 @@ public class SearchService {
     private final CardRepository cardRepository;
     private final PrintingRepository printingRepository;
 
-//    public List<CardResponse> searchCards(Game game, String query, int page, int pageSize) {
-//
-//        Pageable pageable = PageRequest.of(page, pageSize);
-//
-//        Page<Card> resultPage =
-//                cardRepository.findByGameAndNameContainingIgnoreCase(
-//                        game,
-//                        query,
-//                        pageable
-//                );
-//
-//        return resultPage
-//                .stream()
-//                .map(this::toResponse)
-//                .toList();
-//    }
-    
-    
-    public List<CardResponse> searchCards(Game game, String query, int page, int pageSize) {
-        // If your client API expects 1 to be the first page, use: page - 1
-        // If your client API already sends 0 for the first page, leave it as page
-        int springPage = (page > 0) ? page - 1 : 0; 
         
+    public PagedResponse<CardResponse> searchCards(Game game, String query, int page, int pageSize) {
+        int springPage = (page > 0) ? page - 1 : 0;
         Pageable pageable = PageRequest.of(springPage, pageSize);
-        
-        return cardRepository
-                .searchRanked(game.name(), query, pageable)
+
+        Page<Card> resultPage = cardRepository.searchRanked(game.name(), query, pageable);
+
+        List<CardResponse> items = resultPage.getContent()
                 .stream()
                 .map(this::toResponse)
                 .toList();
+
+        return new PagedResponse<>(
+                items,
+                resultPage.getTotalElements(),
+                resultPage.getTotalPages(),
+                page,
+                pageSize
+        );
     }
     
     public List<PrintingResponse> searchPrintingsAdvanced(
@@ -73,6 +64,28 @@ public class SearchService {
                 .toList();
     }
     
+    
+    
+    public PagedResponse<CardSearchResponse> browseCards(Game game, String query, int page, int pageSize) {
+        int springPage = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(springPage, pageSize);
+
+        Page<Card> resultPage = cardRepository.searchRanked(game.name(), query, pageable);
+
+        List<CardSearchResponse> items = resultPage.getContent()
+                .stream()
+                .map(this::toSearchResponse)
+                .toList();
+
+        return new PagedResponse<>(
+                items,
+                resultPage.getTotalElements(),
+                resultPage.getTotalPages(),
+                page,
+                pageSize
+        );
+    }
+    
 
     private CardResponse toResponse(Card card) {
         return new CardResponse(
@@ -87,10 +100,21 @@ public class SearchService {
                 printing.getId(),
                 printing.getCard().getId(),
                 printing.getCardSet().getId(),
+                printing.getCardSet().getName(),
+                printing.getCardSet().getCode(),
                 printing.getCollectorNumber(),
                 printing.getImageUrl(),
                 printing.getRarity(),
                 printing.getIsPromo()
+        );
+    }
+    
+    private CardSearchResponse toSearchResponse(Card card) {
+        return new CardSearchResponse(
+                card.getId(),
+                card.getName(),
+                card.getPrintings().isEmpty() ? null : card.getPrintings().get(0).getImageUrl(),
+                card.getPrintings().size()
         );
     }
     
