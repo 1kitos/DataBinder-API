@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import com.databinder.core.dto.CardResponse;
+import com.databinder.core.dto.CardSearchResponse;
+import com.databinder.core.dto.PagedResponse;
 import com.databinder.core.dto.PrintingResponse;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.search.services.SearchService;
@@ -21,7 +23,7 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping("/cards")
-    public List<CardResponse> searchCards(
+    public PagedResponse<CardResponse> searchCards(
             @RequestParam Game game,
             @RequestParam String query,
             @RequestParam int page,
@@ -41,6 +43,16 @@ public class SearchController {
             @RequestParam int pageSize
     ) {
         return searchService.searchPrintingsAdvanced(game, cardName, setCode, rarity, page, pageSize);
+    }
+    
+    @GetMapping("/cards/browse")
+    public PagedResponse<CardSearchResponse> browseCards(
+            @RequestParam Game game,
+            @RequestParam String query,
+            @RequestParam int page,
+            @RequestParam int pageSize
+    ) {
+        return searchService.browseCards(game, query, page, pageSize);
     }
     
 }

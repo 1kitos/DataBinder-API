@@ -3,6 +3,7 @@ package com.databinder.core.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import com.databinder.core.dto.CardDetailsResponse;
 import com.databinder.core.dto.CardResponse;
 import com.databinder.core.dto.request.CardCreateRequest;
 import com.databinder.core.services.CardService;
@@ -32,6 +33,15 @@ public class CardController {
     @GetMapping("/{id}")
     public CardResponse getById(@PathVariable Long id) {
         return cardService.getById(id);
+    }
+    
+    @GetMapping("/details/{id}")
+    public CardDetailsResponse getCardDetails(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int pageSize
+    ) {
+        return cardService.getCardDetails(id, page, pageSize);
     }
 
     @Operation(summary = "List all cards")

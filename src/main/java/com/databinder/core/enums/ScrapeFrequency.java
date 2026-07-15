@@ -1,4 +1,4 @@
-package com.databinder.core.entities;
+package com.databinder.core.enums;
 
 import java.time.Duration;
 

@@ -1,6 +1,7 @@
 package com.databinder.scheduler;
 
 import com.databinder.core.entities.Printing;
+import com.databinder.alert.services.AlertEvaluationService;
 import com.databinder.core.entities.PriceSnapshot;
 import com.databinder.core.entities.Watchlist;
 import com.databinder.core.entities.WatchlistItem;
@@ -27,6 +28,7 @@ public class WatchlistScrapingScheduler {
     private final WatchlistRepository watchlistRepository;
     private final PriceSnapshotRepository priceSnapshotRepository;
     private final PriceService priceService;
+    private final AlertEvaluationService alertEvaluationService;
 
     @Value("${scraper.delay-ms:4000}")
     private long delayMs;
@@ -81,6 +83,9 @@ public class WatchlistScrapingScheduler {
             try {
                 priceService.fetchAndSaveSnapshot(printing.getId());
                 log.info("Snapshot criado com sucesso para printing {}", printing.getId());
+
+                alertEvaluationService.evaluateAlerts(item);
+
             } catch (Exception e) {
                 log.error("Falha ao fazer scraping da printing {}: {}", printing.getId(), e.getMessage());
             }

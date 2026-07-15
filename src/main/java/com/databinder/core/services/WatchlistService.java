@@ -1,5 +1,7 @@
 package com.databinder.core.services;
 
+import com.databinder.core.dto.PrintingResponse;
+import com.databinder.core.dto.WatchlistItemDetailsResponse;
 import com.databinder.core.dto.WatchlistItemResponse;
 import com.databinder.core.dto.WatchlistResponse;
 import com.databinder.core.dto.request.WatchlistCreateRequest;
@@ -9,7 +11,9 @@ import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.User;
 import com.databinder.core.entities.Watchlist;
 import com.databinder.core.entities.WatchlistItem;
+import com.databinder.core.enums.AlertType;
 import com.databinder.core.exception.ResourceNotFoundException;
+import com.databinder.core.mapping.ResponseMapper;
 import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.UserRepository;
 import com.databinder.core.repositories.WatchlistItemRepository;
@@ -19,7 +23,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,6 +36,7 @@ public class WatchlistService {
     private final WatchlistItemRepository watchlistItemRepository;
     private final UserRepository userRepository;
     private final PrintingRepository printingRepository;
+    private final PrintingService printingService;
 
     public WatchlistResponse create(WatchlistCreateRequest request) {
         User user = userRepository.findById(request.getUserId())
@@ -39,17 +46,17 @@ public class WatchlistService {
         watchlist.setUser(user);
         watchlist.setName(request.getName());
 
-        return toResponse(watchlistRepository.save(watchlist));
+        return ResponseMapper.toResponse(watchlistRepository.save(watchlist));
     }
 
     public WatchlistResponse getById(Long id) {
-        return toResponse(findWatchlistOrThrow(id));
+        return ResponseMapper.toResponse(findWatchlistOrThrow(id));
     }
 
     public List<WatchlistResponse> getByUser(Long userId) {
         return watchlistRepository.findByUserId(userId)
                 .stream()
-                .map(this::toResponse)
+                .map(ResponseMapper::toResponse)
                 .toList();
     }
 
@@ -76,7 +83,7 @@ public class WatchlistService {
 
         watchlistItemRepository.save(item);
 
-        return toResponse(findWatchlistOrThrow(watchlistId));
+        return ResponseMapper.toResponse(findWatchlistOrThrow(watchlistId));
     }
 
     public void removeItem(Long watchlistId, Long itemId) {
@@ -113,24 +120,92 @@ public class WatchlistService {
         	 watchlist.setAutoScrapeEnabled(request.getAutoScrapeEnabled());
         }
         
-        return toResponse(watchlistRepository.save(watchlist));
+        return ResponseMapper.toResponse(watchlistRepository.save(watchlist));
+    }
+    
+    
+    public WatchlistItemResponse updateItem(Long Id,List<AlertType> alarmsToAdd,
+    									 	List<AlertType> alarmsToRemove,Boolean alertEnabled)
+    {
+    	WatchlistItem item = watchlistItemRepository.findById(Id)
+    			.orElseThrow(() -> new ResourceNotFoundException("Watchlist Item not found: " + Id));
+    	
+    	List<AlertType> alerts = (item.getAlerts() != null) ? item.getAlerts() : new ArrayList<AlertType>();
+    	
+    	
+    	
+    	for(AlertType a : alarmsToAdd)
+    	{
+    		if(alerts.contains(a))
+    		{
+    			continue;
+    		}
+    		alerts.add(a);
+    	}
+    	
+    	for (AlertType a : alarmsToRemove)
+    	{
+    		if(!alerts.contains(a))
+    		{
+    			continue;
+    		}
+    		alerts.remove(a);
+    	}
+    	
+    	item.setAlerts(alerts);
+    	
+    	if(alertEnabled != null)
+    	{
+    		item.setAlertEnabled(alertEnabled);
+    	}
+    	
+    	return ResponseMapper.toResponse(watchlistItemRepository.save(item));
+    }
+    
+    public WatchlistItemResponse getItem(Long id) {
+        WatchlistItem item = watchlistItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Watchlist Item not found: " + id));
+
+        return ResponseMapper.toResponse(item);
+    }
+    
+    public List<WatchlistItemDetailsResponse> getItemDetailsForWatchlist(Long id)
+    {
+    	Watchlist list = watchlistRepository.findById(id)
+    			.orElseThrow(() -> new ResourceNotFoundException("Watchlist Item not found: " + id));
+    	
+    	List<WatchlistItemDetailsResponse> itemDetailsResponse = list.getItems().stream()
+    			.map(ResponseMapper::toDetailsResponse)
+    			.toList();
+    	 	
+    	return itemDetailsResponse;
     }
 
-    private WatchlistResponse toResponse(Watchlist watchlist) {
-        List<WatchlistItemResponse> items = watchlist.getItems().stream()
-                .map(item -> new WatchlistItemResponse(
-                        item.getId(),
-                        item.getPrinting().getId(),
-                        item.getAddedAt()
-                ))
-                .toList();
-
-        return new WatchlistResponse(
-                watchlist.getId(),
-                watchlist.getUser().getId(),
-                watchlist.getName(),
-                watchlist.getCreatedAt(),
-                items
-        );
-    }
+    
+    
+//    private WatchlistItemDetailsResponse toDetailsResponse(WatchlistItem item) {
+//        Printing printing = item.getPrinting();
+//
+//        PrintingResponse printingResponse = new PrintingResponse(
+//                printing.getId(),
+//                printing.getCard().getId(),
+//                printing.getCardSet().getId(),
+//                printing.getCardSet().getName(),
+//                printing.getCardSet().getCode(),
+//                printing.getCollectorNumber(),
+//                printing.getImageUrl(),
+//                printing.getRarity(),
+//                printing.getIsPromo()
+//        );
+//
+//        return new WatchlistItemDetailsResponse(
+//                item.getId(),
+//                printingResponse,
+//                item.getAlertTriggered(),
+//                item.getAlertEnabled(),
+//                item.getAlerts()
+//        );
+//    }
+    
+//    private Watchlist
 }

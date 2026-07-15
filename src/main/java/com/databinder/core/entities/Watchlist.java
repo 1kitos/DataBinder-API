@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databinder.core.enums.ScrapeFrequency;
+
 @Entity
 @Table(name = "watchlists")
 @Getter

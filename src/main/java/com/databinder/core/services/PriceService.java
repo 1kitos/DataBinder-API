@@ -109,7 +109,7 @@ public class PriceService {
         priceSnapshotRepository.deleteById(id);
     }
 
-    private PriceSnapshotResponse toResponse(PriceSnapshot snapshot) {
+    public PriceSnapshotResponse toResponse(PriceSnapshot snapshot) {
 
         Long id = snapshot != null ? snapshot.getId() : null;
 

@@ -5,6 +5,7 @@ import com.databinder.core.dto.request.RarityCreateRequest;
 import com.databinder.core.entities.Rarity;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.exception.ResourceNotFoundException;
+import com.databinder.core.mapping.ResponseMapper;
 import com.databinder.core.repositories.RarityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,27 +40,27 @@ public class RarityService {
         Rarity saved = rarityRepository.save(rarity);
         log.info("Created rarity: {} for game: {}", saved.getName(), saved.getGame());
         
-        return toResponse(saved);
+        return ResponseMapper.toResponse(saved);
     }
 
     public RarityResponse getById(Long id) {
         Rarity rarity = rarityRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Rarity not found: " + id));
         
-        return toResponse(rarity);
+        return ResponseMapper.toResponse(rarity);
     }
 
     public List<RarityResponse> getAll() {
         return rarityRepository.findAll()
             .stream()
-            .map(this::toResponse)
+            .map(ResponseMapper::toResponse)
             .toList();
     }
 
     public List<RarityResponse> getByGame(Game game) {
         return rarityRepository.findByGameOrderBySortOrderAsc(game)
             .stream()
-            .map(this::toResponse)
+            .map(ResponseMapper::toResponse)
             .toList();
     }
 
@@ -86,7 +87,7 @@ public class RarityService {
         Rarity updated = rarityRepository.save(rarity);
         log.info("Updated rarity with id: {}", id);
         
-        return toResponse(updated);
+        return ResponseMapper.toResponse(updated);
     }
 
     @Transactional
@@ -112,14 +113,5 @@ public class RarityService {
         log.info("Deleted all rarities for game: {}", game);
     }
 
-    private RarityResponse toResponse(Rarity rarity) {
-        return new RarityResponse(
-            rarity.getId(),
-            rarity.getName(),
-            rarity.getCode(),
-            rarity.getSlug(),
-            rarity.getSortOrder(),
-            rarity.getGame()
-        );
-    }
+
 }
