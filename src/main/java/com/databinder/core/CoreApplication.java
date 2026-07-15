@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = {"com.databinder.core", "com.databinder.scrapping", 
 											"com.databinder.config", "com.databinder.search",
-											"com.databinder.scheduler"})
+											"com.databinder.scheduler", "com.databinder.alert"})
 @EnableJpaRepositories(basePackages = {"com.databinder.core.repositories", "com.databinder.config.repositories"})
 @EntityScan(basePackages = {"com.databinder.core.entities", "com.databinder.config.entities"})
 @EnableScheduling

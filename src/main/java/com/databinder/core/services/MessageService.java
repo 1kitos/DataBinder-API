@@ -8,6 +8,7 @@ import com.databinder.core.dto.MessageResponse;
 import com.databinder.core.entities.Message;
 import com.databinder.core.entities.User;
 import com.databinder.core.enums.MessageStatus;
+import com.databinder.core.mapping.ResponseMapper;
 import com.databinder.core.repositories.MessageRepository;
 import com.databinder.core.repositories.UserRepository;
 
@@ -30,13 +31,13 @@ public class MessageService {
         message.setHeader(header);
         message.setBody(body);
 
-        return toResponse(messageRepository.save(message));
+        return ResponseMapper.toResponse(messageRepository.save(message));
     }
 
     public List<MessageResponse> getMessagesForUser(Long userId) {
         return messageRepository.findByToUserId(userId)
                 .stream()
-                .map(this::toResponse)
+                .map(ResponseMapper::toResponse)
                 .toList();
     }
 
@@ -56,17 +57,12 @@ public class MessageService {
     		msg.setRead(read);
     	}
     	
-    	return toResponse(messageRepository.save(msg));
+    	return ResponseMapper.toResponse(messageRepository.save(msg));
     	
     }
-
-    private MessageResponse toResponse(Message message) {
-        return new MessageResponse(
-                message.getId(),
-                message.getToUser().getId(),
-                message.getHeader(),
-                message.getBody(),
-                message.getStatus()
-        );
+    
+    public void save(Message message) {
+        messageRepository.save(message);
     }
+
 }
