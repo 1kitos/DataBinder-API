@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.databinder.core.dto.MessageResponse;
 import com.databinder.core.dto.PriceSnapshotResponse;
 import com.databinder.core.dto.PrintingDetailsResponse;
 import com.databinder.core.dto.PrintingResponse;
@@ -16,6 +17,7 @@ import com.databinder.core.dto.WatchlistItemResponse;
 import com.databinder.core.dto.WatchlistResponse;
 import com.databinder.core.entities.Card;
 import com.databinder.core.entities.CardSet;
+import com.databinder.core.entities.Message;
 import com.databinder.core.entities.PriceSnapshot;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.Rarity;
@@ -149,6 +151,16 @@ public  class ResponseMapper
     	result.setAlerts(item.getAlerts());
     	
     	return result;
+    }
+    
+    public static MessageResponse toResponse(Message message) {
+        return new MessageResponse(
+                message.getId(),
+                message.getToUser().getId(),
+                message.getHeader(),
+                message.getBody(),
+                message.getStatus()
+        );
     }
 	
 }

@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/messages")
+@RequestMapping("/messages")
 @RequiredArgsConstructor
 @Tag(name = "Messages", description = "Manage messages")
 public class MessageController {
