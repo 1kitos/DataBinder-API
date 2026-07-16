@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.databinder.core.dto.CardResponse;
 import com.databinder.core.dto.MessageResponse;
 import com.databinder.core.dto.PriceSnapshotResponse;
 import com.databinder.core.dto.PrintingDetailsResponse;
@@ -36,7 +37,9 @@ public  class ResponseMapper
                 printing.getCardSet().getName(),
                 printing.getCardSet().getCode(),
                 printing.getCollectorNumber(),
-                printing.getImageUrl(),
+                printing.getImageData() != null
+                ? "/api/printings/" + printing.getId() + "/image"
+                : printing.getImageUrl(), // fallback to stored URL if no binary image yet
                 printing.getRarity(),
                 printing.getIsPromo()
         );
@@ -45,15 +48,20 @@ public  class ResponseMapper
     
     public static PrintingDetailsResponse toDetailsResponse(Printing printing) {
         Card printingCard = printing.getCard();
-        return new PrintingDetailsResponse(printing.getId(),
-                                           printingCard.getName(),
-                                           printing.getCardSet().getName(),
-                                           printing.getCollectorNumber(),
-                                           printing.getRarity(),
-                                           printing.getImageUrl(),
-                                           printing.getPriceSnapshots().stream()
-                                               .map(ResponseMapper::toResponse)
-                                               .collect(Collectors.toList()));
+        return new PrintingDetailsResponse(
+            printing.getId(),
+            printingCard.getName(),
+            printing.getCardSet().getName(),
+            printing.getCollectorNumber(),
+            printing.getRarity(),
+            printing.getImageData() != null
+                ? "/api/printings/" + printing.getId() + "/image"
+                : printing.getImageUrl(), // fallback to stored URL if no binary image yet
+            printing.getVersionNumber(),
+            printing.getPriceSnapshots().stream()
+                .map(ResponseMapper::toResponse) // or however you're mapping now
+                .collect(Collectors.toList())
+        );
     }
     
     public static PriceSnapshotResponse toResponse(PriceSnapshot snapshot) {
@@ -162,5 +170,15 @@ public  class ResponseMapper
                 message.getStatus()
         );
     }
+    
+    public static CardResponse toResponse(Card card) {
+        return new CardResponse(
+                card.getId(),
+                card.getName(),
+                card.getOracleText()
+        );
+    }
+    
+    
 	
 }

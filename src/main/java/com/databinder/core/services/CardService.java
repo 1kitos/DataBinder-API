@@ -11,6 +11,7 @@ import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.Rarity;
 import com.databinder.core.exception.ResourceNotFoundException;
+import com.databinder.core.mapping.ResponseMapper;
 import com.databinder.core.repositories.CardRepository;
 import com.databinder.core.repositories.RarityRepository;
 
@@ -35,20 +36,20 @@ public class CardService {
         card.setName(request.getName());
         card.setOracleText(request.getOracleText());
 
-        return toResponse(cardRepository.save(card));
+        return ResponseMapper.toResponse(cardRepository.save(card));
     }
 
     public CardResponse getById(Long id) {
         Card card = cardRepository.findById(id)
         		.orElseThrow(() -> new ResourceNotFoundException("Card not found: " + id));
 
-        return toResponse(card);
+        return ResponseMapper.toResponse(card);
     }
 
     public List<CardResponse> getAll() {
         return cardRepository.findAll()
                 .stream()
-                .map(this::toResponse)
+                .map(ResponseMapper::toResponse)
                 .toList();
     }
 
@@ -59,7 +60,7 @@ public class CardService {
         card.setName(request.getName());
         card.setOracleText(request.getOracleText());
 
-        return toResponse(cardRepository.save(card));
+        return ResponseMapper.toResponse(cardRepository.save(card));
     }
 
     public void delete(Long id) {
@@ -79,7 +80,7 @@ public class CardService {
 
         List<PrintingResponse> allPrintings = card.getPrintings()
                 .stream()
-                .map(this::toPrintingResponse)
+                .map(ResponseMapper::toResponse)
                 .sorted(
                     Comparator.comparing(PrintingResponse::getSetId)
                               .thenComparing(p -> raritySortMap.getOrDefault(p.getRarity(), Integer.MAX_VALUE))
@@ -111,25 +112,5 @@ public class CardService {
         );
     }
 
-    private CardResponse toResponse(Card card) {
-        return new CardResponse(
-                card.getId(),
-                card.getName(),
-                card.getOracleText()
-        );
-    }
     
-    private PrintingResponse toPrintingResponse(Printing printing) {
-        return new PrintingResponse(
-                printing.getId(),
-                printing.getCard().getId(),
-                printing.getCardSet().getId(),
-                printing.getCardSet().getName(),
-                printing.getCardSet().getCode(),
-                printing.getCollectorNumber(),
-                printing.getImageUrl(),
-                printing.getRarity(),
-                printing.getIsPromo()
-        );
-    }
 }

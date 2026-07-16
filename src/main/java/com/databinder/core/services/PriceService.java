@@ -11,9 +11,9 @@ import com.databinder.core.entities.Printing;
 import com.databinder.core.exception.ResourceNotFoundException;
 import com.databinder.core.repositories.PriceSnapshotRepository;
 import com.databinder.core.repositories.PrintingRepository;
-import com.databinder.scrapping.CardmarketPriceData;
 import com.databinder.scrapping.CardmarketScrapingService;
 import com.databinder.scrapping.CardmarketUrlBuilder;
+import com.databinder.scrapping.responses.CardmarketPriceData;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -82,12 +82,7 @@ public class PriceService {
         Printing printing = printingRepository.findById(printingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Printing not found: " + printingId));
 
-        String cmUrl = cardmarketUrlBuilder.buildSinglesUrl(
-                printing.getCardSet().getGame(),
-                printing.getCardSet().getName(),
-                printing.getCard().getName(),
-                printing.getRarity()
-        );
+        String cmUrl = printing.getPrintingUrl();
 
         CardmarketPriceData priceData = cardmarketScrapingService.fetchPrices(cmUrl);
 

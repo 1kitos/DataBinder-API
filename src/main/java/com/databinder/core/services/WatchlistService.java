@@ -183,29 +183,4 @@ public class WatchlistService {
 
     
     
-//    private WatchlistItemDetailsResponse toDetailsResponse(WatchlistItem item) {
-//        Printing printing = item.getPrinting();
-//
-//        PrintingResponse printingResponse = new PrintingResponse(
-//                printing.getId(),
-//                printing.getCard().getId(),
-//                printing.getCardSet().getId(),
-//                printing.getCardSet().getName(),
-//                printing.getCardSet().getCode(),
-//                printing.getCollectorNumber(),
-//                printing.getImageUrl(),
-//                printing.getRarity(),
-//                printing.getIsPromo()
-//        );
-//
-//        return new WatchlistItemDetailsResponse(
-//                item.getId(),
-//                printingResponse,
-//                item.getAlertTriggered(),
-//                item.getAlertEnabled(),
-//                item.getAlerts()
-//        );
-//    }
-    
-//    private Watchlist
 }

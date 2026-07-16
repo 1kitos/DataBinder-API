@@ -4,6 +4,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -18,12 +22,16 @@ import com.databinder.core.entities.CardSet;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.Rarity;
+import com.databinder.core.exception.ResourceNotFoundException;
 import com.databinder.core.repositories.CardRepository;
 import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.RarityRepository;
 import com.databinder.core.repositories.SetRepository;
 import com.databinder.excel.RarityExcelModel;
 import com.databinder.excel.RarityExcelReader;
+import com.databinder.scrapping.CardmarketScrapingService;
+import com.databinder.scrapping.CardmarketUrlBuilder;
+import com.databinder.scrapping.responses.CardmarketVersionData;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +45,13 @@ public class YugiohConfigService {
     private final PrintingRepository printingRepository;
     private final DbVersionRepository dbVersionRepository;
     private final RarityRepository rarityRepository;
+    
+    private final CardmarketScrapingService scrapingService;
+    private final CardmarketUrlBuilder cardmarketUrlBuilder;
+    
+    private final VersionImportService versionImportService;
+    
+    private final ExecutorService versionImportExecutor;
 
     private final WebClient webClient = WebClient.builder()
     	    .codecs(config -> config.defaultCodecs().maxInMemorySize(50 * 1024 * 1024))
@@ -64,147 +79,52 @@ public class YugiohConfigService {
             .orElse(true);
     }
 
-    public void importAll() {
-        JsonNode versionNode = webClient.get()
-            .uri(VERSION_URL)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
+    public void importCards() {
 
         JsonNode root = webClient.get()
-            .uri(API_URL)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
+                .uri(API_URL)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
 
-        if (root == null || !root.has("data")) return;
+        if (root == null || !root.has("data")) {
+            return;
+        }
 
-        // 1. Load everything into memory maps
         Map<String, Card> cardsByName = cardRepository.findAll()
-            .stream().collect(Collectors.toMap(Card::getName, c -> c));
-
-        Map<String, CardSet> setsByCode = cardSetRepository.findAll()
-            .stream().collect(Collectors.toMap(CardSet::getCode, s -> s));
+                .stream()
+                .collect(Collectors.toMap(
+                        Card::getName,
+                        c -> c
+                ));
 
         List<Card> cardsToPersist = new ArrayList<>();
-        List<CardSet> setsToPersist = new ArrayList<>();
 
-        // 1st Pass — Upsert Cards and Sets
         for (JsonNode cardNode : root.get("data")) {
+
             String name = cardNode.get("name").asText();
-            String oracleText = cardNode.has("desc") ? cardNode.get("desc").asText() : null;
+
+            String oracleText = cardNode.has("desc")
+                    ? cardNode.get("desc").asText()
+                    : null;
+
 
             Card card = cardsByName.get(name);
+
             if (card == null) {
                 card = new Card();
                 card.setName(name);
-                card.setOracleText(oracleText);
+
                 cardsByName.put(name, card);
-                cardsToPersist.add(card);
-            } else {
-                // Future-proofing: Update existing card fields if they changed
-                card.setOracleText(oracleText);
-                cardsToPersist.add(card); 
             }
 
-            if (!cardNode.has("card_sets")) continue;
+            // update fields
+            card.setOracleText(oracleText);
 
-            for (JsonNode setNode : cardNode.get("card_sets")) {
-                String code = setNode.get("set_code").asText();
-                String setCode = code.contains("-") ? code.substring(0, code.indexOf("-")) : code;
-                String setName = setNode.get("set_name").asText();
-
-                CardSet cardSet = setsByCode.get(setCode);
-                if (cardSet == null) {
-                    cardSet = new CardSet();
-                    cardSet.setName(setName);
-                    cardSet.setCode(setCode);
-                    cardSet.setGame(Game.YUGIOH);
-                    setsByCode.put(setCode, cardSet);
-                    setsToPersist.add(cardSet);
-                } else {
-                    // Update field if needed
-                    cardSet.setName(setName);
-                    setsToPersist.add(cardSet);
-                }
-            }
+            cardsToPersist.add(card);
         }
 
-        // Persist Cards and Sets so they definitely have IDs for the next phase
         cardRepository.saveAll(cardsToPersist);
-        cardSetRepository.saveAll(setsToPersist);
-
-        // 2. Load existing printings into a map using the compound key
-        Map<String, Printing> existingPrintingsMap = printingRepository.findAll()
-            .stream()
-            .collect(Collectors.toMap(
-                p -> p.getCard().getId() + "-" + p.getCardSet().getId(),
-                p -> p,
-                (existing, replacement) -> existing // Fallback merger function
-            ));
-
-        List<Printing> printingsToPersist = new ArrayList<>();
-
-        // 2nd Pass — Upsert Printings
-        for (JsonNode cardNode : root.get("data")) {
-            String name = cardNode.get("name").asText();
-            Card card = cardsByName.get(name);
-
-            if (!cardNode.has("card_sets") || card == null) continue;
-
-            String imageUrl = cardNode.has("card_images")
-                ? cardNode.get("card_images").get(0).get("image_url").asText()
-                : null;
-
-            for (JsonNode setNode : cardNode.get("card_sets")) {
-                String code = setNode.get("set_code").asText();
-                String setCode = code.contains("-") ? code.substring(0, code.indexOf("-")) : code;
-                CardSet cardSet = setsByCode.get(setCode);
-
-                if (cardSet == null) continue;
-
-                String rarity = setNode.has("set_rarity") ? setNode.get("set_rarity").asText() : null;
-                String key = card.getId() + "-" + cardSet.getId() + "-" + rarity;
-
-                Printing printing = existingPrintingsMap.get(key);
-                
-                if (printing == null) {
-                    // Create new printing if it doesn't exist
-                    printing = new Printing();
-                    printing.setCard(card);
-                    printing.setCardSet(cardSet);
-                    existingPrintingsMap.put(key, printing);
-                }
-                
-                // --- Dynamic Field Alignment ---
-                // This updates old records with missing rarities AND saves new records!
-                printing.setCollectorNumber(code);
-                printing.setImageUrl(imageUrl);
-                printing.setRarity(rarity); 
-                
-                // Add any future entity properties here:
-                // printing.setSomeFutureField(setNode.get("future").asText());
-
-                printingsToPersist.add(printing);
-            }
-        }
-
-        // Saves everything (executes INSERTs for new ones and UPDATEs for existing ones)
-        printingRepository.saveAll(printingsToPersist);
-
-        // 3. Update Database Version Tracker
-        if (versionNode != null && versionNode.isArray() && versionNode.size() > 0) {
-            String remoteVersion = versionNode.get(0).get("database_version").asText();
-            DbVersion dbVersion = dbVersionRepository.findByGame(Game.YUGIOH)
-                .orElseGet(() -> {
-                    DbVersion v = new DbVersion();
-                    v.setGame(Game.YUGIOH);
-                    return v;
-                });
-            dbVersion.setVersion(remoteVersion);
-            dbVersion.setLastUpdated(Instant.now());
-            dbVersionRepository.save(dbVersion);
-        }
     }
 
     @Transactional
@@ -333,6 +253,89 @@ public class YugiohConfigService {
         }
     }
     
+    
+    public void importPrintings() {
+
+        List<Card> allCards = cardRepository.findAll();
+
+        List<Future<?>> futures = new ArrayList<>();
+
+        int total = allCards.size();
+
+        AtomicInteger submitted = new AtomicInteger();
+        AtomicInteger completed = new AtomicInteger();
+
+        long start = System.currentTimeMillis();
+
+        for (Card card : allCards) {
+
+            int current = submitted.incrementAndGet();
+
+            System.out.printf(
+                    "Submitting %d/%d - %s%n",
+                    current,
+                    total,
+                    card.getName());
+
+            futures.add(
+                    versionImportExecutor.submit(() -> {
+
+                        try {
+                            versionImportService.importCardPrintings(card.getId());
+                        } finally {
+
+                            int done = completed.incrementAndGet();
+
+                            if (done % 100 == 0 || done == total) {
+
+                                long elapsedMs = System.currentTimeMillis() - start;
+
+                                double elapsedMinutes = elapsedMs / 60000.0;
+
+                                double cardsPerMinute =
+                                        elapsedMinutes > 0
+                                                ? done / elapsedMinutes
+                                                : 0;
+
+                                double etaMinutes =
+                                        cardsPerMinute > 0
+                                                ? (total - done) / cardsPerMinute
+                                                : 0;
+
+                                System.out.printf(
+                                        "Progress: %d/%d (%.1f%%) | Elapsed: %.1f min | ETA: %.1f min%n",
+                                        done,
+                                        total,
+                                        done * 100.0 / total,
+                                        elapsedMinutes,
+                                        etaMinutes
+                                );
+                            }
+                        }
+                    })
+            );
+        }
+
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        long elapsedMs = System.currentTimeMillis() - start;
+
+        System.out.printf(
+                "Version import complete. Imported %d cards in %.2f minutes.%n",
+                total,
+                elapsedMs / 60000.0
+        );
+    }
+    
+    
+    
+      
     @Transactional
     public void clearRarities() {
         rarityRepository.deleteByGame(SERVICE_GAME);
