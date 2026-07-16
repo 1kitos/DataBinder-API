@@ -19,6 +19,7 @@ public class PrintingDetailsResponse
 	private String collectorNumber;
 	private String rarity;
 	private String imageUrl;
+	private Integer versionNumber;
 	
 	private List<PriceSnapshotResponse> priceSnapshots;
 }

@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.databinder.core.dto.CardResponse;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.RarityRepository;
+import com.databinder.core.services.CardService;
 import com.databinder.core.services.PrintingService;
 import com.databinder.core.services.RarityService;
 
@@ -23,6 +25,7 @@ public class CardmarketUrlBuilder {
     @Value("${cardmarket.base-url}")
     private String baseUrl;
     
+    private final CardService cardService;
     private final PrintingService printingService;
 
     public String buildSinglesUrl(Game game, String setName, String cardName, String rarity) {
@@ -54,6 +57,16 @@ public class CardmarketUrlBuilder {
                 formatSlug(setName),
                 slug);
     }
+    
+    public String buildVersionsUrl(Game game, Long printingId) {
+        CardResponse card = cardService.getById(printingId);
+
+        return String.format("%s/%s/Cards/%s/Versions",
+                baseUrl,
+                game.getCardmarketPath(),
+                formatSlug(card.getName()));
+    }
+    
 
     private static String formatSlug(String value) {
         return value

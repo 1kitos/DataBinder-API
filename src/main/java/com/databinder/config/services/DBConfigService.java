@@ -1,11 +1,14 @@
 package com.databinder.config.services;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.databinder.config.entities.DbVersion;
 import com.databinder.config.repositories.DbVersionRepository;
+import com.databinder.core.entities.Card;
 import com.databinder.core.repositories.CardRepository;
 import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.SetRepository;
@@ -31,5 +34,6 @@ public class DBConfigService {
         cardSetRepository.deleteAll();
         dbVersionRepository.deleteAll();
     }
+    
 	
 }

@@ -1,4 +1,4 @@
-package com.databinder.scrapping;
+package com.databinder.scrapping.parsers;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

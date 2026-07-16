@@ -1,7 +1,10 @@
 package com.databinder.scrapping;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import com.microsoft.playwright.Browser;
@@ -13,6 +16,9 @@ import com.microsoft.playwright.options.LoadState;
 
 import lombok.RequiredArgsConstructor;
 
+import com.databinder.scrapping.parsers.CardmarketPriceParser;
+import com.databinder.scrapping.responses.CardmarketPriceData;
+import com.databinder.scrapping.responses.CardmarketVersionData;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
@@ -44,5 +50,13 @@ public class CardmarketScrapingService {
             .retrieve()
             .bodyToMono(CardmarketPriceData.class)
             .block();
+    }
+    
+    public List<CardmarketVersionData> fetchVersions(String url) {
+        return webClient.get()
+                .uri(scraperBaseUrl + "/versions?url=" + url)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<CardmarketVersionData>>() {})
+                .block();
     }
 }
