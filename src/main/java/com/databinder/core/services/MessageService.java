@@ -20,7 +20,9 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
-
+    
+    private final AuthenticationService authenticationService;
+    
     public MessageResponse createMessage(Long userId, String header, String body) {
 
         User user = userRepository.findById(userId)
@@ -33,6 +35,13 @@ public class MessageService {
 
         return ResponseMapper.toResponse(messageRepository.save(message));
     }
+    
+    public List<MessageResponse> getMyMessages() {
+    	User currentUser = authenticationService.getCurrentUser();
+
+        return getMessagesForUser(currentUser.getId());
+    }
+    
 
     public List<MessageResponse> getMessagesForUser(Long userId) {
         return messageRepository.findByToUserId(userId)
