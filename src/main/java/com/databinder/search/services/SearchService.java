@@ -12,6 +12,7 @@ import com.databinder.core.dto.PagedResponse;
 import com.databinder.core.dto.PrintingResponse;
 import com.databinder.core.entities.Card;
 import com.databinder.core.entities.Printing;
+import com.databinder.core.mapping.ResponseMapper;
 import com.databinder.core.entities.CardSet.Game;
 import com.databinder.core.repositories.CardRepository;
 import com.databinder.core.repositories.PrintingRepository;
@@ -60,7 +61,7 @@ public class SearchService {
         return printingRepository
                 .searchPrintingsAdvanced(game.name(), cardName, setCode, rarity, pageable)
                 .stream()
-                .map(this::toResponse)
+                .map(ResponseMapper::toResponse)
                 .toList();
     }
     
@@ -95,25 +96,25 @@ public class SearchService {
         );
     }
     
-    private PrintingResponse toResponse(Printing printing) {
-        return new PrintingResponse(
-                printing.getId(),
-                printing.getCard().getId(),
-                printing.getCardSet().getId(),
-                printing.getCardSet().getName(),
-                printing.getCardSet().getCode(),
-                printing.getCollectorNumber(),
-                printing.getImageUrl(),
-                printing.getRarity(),
-                printing.getIsPromo()
-        );
-    }
-    
+
     private CardSearchResponse toSearchResponse(Card card) {
+
+        Printing printing = card.getPrintings().isEmpty()
+                ? null
+                : card.getPrintings().get(0);
+
+        String imageUrl = null;
+
+        if (printing != null) {
+            imageUrl = printing.getImageData() != null
+                    ? "/api/printings/" + printing.getId() + "/image"
+                    : printing.getImageUrl();
+        }
+
         return new CardSearchResponse(
                 card.getId(),
                 card.getName(),
-                card.getPrintings().isEmpty() ? null : card.getPrintings().get(0).getImageUrl(),
+                imageUrl,
                 card.getPrintings().size()
         );
     }

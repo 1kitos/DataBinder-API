@@ -24,14 +24,22 @@ public class ConfigurationController {
 
     private final YugiohConfigService yugiohConfigService;
     private final DBConfigService dbConfigService;
+    
 
-    @PostMapping("/yugioh")
+    @PostMapping("/yugioh/cards")
     public ResponseEntity<String> configureYugioh() {
-        yugiohConfigService.importAll();
+        yugiohConfigService.importCards();
         return ResponseEntity.ok("Yugioh import completed");
     }
     
-    @PostMapping("yugioh-rarities")
+    @PostMapping("/yugioh/printings")
+    public ResponseEntity<String> configureYugiohPrintings()
+    {
+    	yugiohConfigService.importPrintings();
+    	return ResponseEntity.ok("Yugioh import versions completed");
+    }
+    
+    @PostMapping("/yugioh-rarities")
     public ResponseEntity<String> configureYugiohRarities() {
         yugiohConfigService.importRarities();
         return ResponseEntity.ok("Yugioh Rarities import completed");
