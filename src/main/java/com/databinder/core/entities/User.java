@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.time.Instant;
 
+import com.databinder.core.enums.Role;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -22,12 +24,29 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String password;
+
     private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER;
+
+    @Column(nullable = false)
+    private boolean enabled = true;
 
     private Instant createdAt;
 
+    private Instant updatedAt;
+
     @PrePersist
-    protected void onCreate() {
-        this.createdAt = Instant.now();
+    void onCreate() {
+        createdAt = Instant.now();
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        updatedAt = Instant.now();
     }
 }

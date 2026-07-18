@@ -25,11 +25,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public UserResponse create(@Valid @RequestBody UserCreateRequest request) {
-        return userService.create(request);
-    }
-
     @GetMapping("/{id}")
     public UserResponse getById(@PathVariable Long id) {
         return userService.getById(id);
