@@ -21,11 +21,19 @@ public class MessageController {
 
     private final MessageService messageService;
 
-    @GetMapping("/user/{userId}")
-    public List<MessageResponse> getMessagesForUser(@PathVariable Long userId) {
-        return messageService.getMessagesForUser(userId);
+    @GetMapping
+    public List<MessageResponse> getMyMessages() {
+        return messageService.getMyMessages();
     }
 
+    // USAR NO SWAGGER, NAO NO WEB
+    @GetMapping("/user/{userId}")
+    public List<MessageResponse> getMessagesForUser(
+            @PathVariable Long userId) {
+
+        return messageService.getMessagesForUser(userId);
+    }
+    // USAR NO SWAGGER, NAO NO WEB
     @PostMapping("/user/{userId}")
     @ResponseStatus(HttpStatus.CREATED)
     public MessageResponse createMessage(
