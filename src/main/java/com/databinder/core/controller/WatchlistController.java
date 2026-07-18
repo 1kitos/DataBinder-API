@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 
 @RestController
@@ -23,6 +24,8 @@ import java.util.List;
 public class WatchlistController {
 
     private final WatchlistService watchlistService;
+    
+    
 
     @PostMapping
     public WatchlistResponse create(@Valid @RequestBody WatchlistCreateRequest request) {
@@ -35,8 +38,8 @@ public class WatchlistController {
     }
 
     @GetMapping
-    public List<WatchlistResponse> getByUser(@RequestParam Long userId) {
-        return watchlistService.getByUser(userId);
+    public List<WatchlistResponse> getMyWatchlists() {
+        return watchlistService.getMyWatchlists();
     }
 
     @DeleteMapping("/{id}")

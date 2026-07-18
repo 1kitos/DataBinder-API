@@ -112,11 +112,11 @@ public  class ResponseMapper
     
     public static UserResponse toResponse(User user) {
         return new UserResponse(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getPhoneNumber(),
-            user.getCreatedAt()
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                user.getRole()
         );
     }
     
