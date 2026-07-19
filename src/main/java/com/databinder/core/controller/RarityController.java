@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RestController
-@RequestMapping("/rarities")
+@RequestMapping("/api/rarities")
 @RequiredArgsConstructor
 @Tag(name = "Rarities", description = "Manage card rarities")
 public class RarityController {

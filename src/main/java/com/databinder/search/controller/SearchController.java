@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
 @RestController
-@RequestMapping("/search")
+@RequestMapping("/api/search")
 @RequiredArgsConstructor
 @Tag(name = "Search", description = "Search for entities in the Database")
 public class SearchController {

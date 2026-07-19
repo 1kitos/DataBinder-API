@@ -44,7 +44,7 @@ public class MessageService {
     
 
     public List<MessageResponse> getMessagesForUser(Long userId) {
-        return messageRepository.findByToUserId(userId)
+        return messageRepository.findByToUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(ResponseMapper::toResponse)
                 .toList();

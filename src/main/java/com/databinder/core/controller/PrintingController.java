@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/printings")
+@RequestMapping("/api/printings")
 @RequiredArgsConstructor
 @Tag(name = "Printings", description = "CRUD operations for card printings")
 public class PrintingController {

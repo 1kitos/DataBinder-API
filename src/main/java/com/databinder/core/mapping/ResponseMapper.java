@@ -164,9 +164,10 @@ public  class ResponseMapper
     public static MessageResponse toResponse(Message message) {
         return new MessageResponse(
                 message.getId(),
-                message.getToUser().getId(),
                 message.getHeader(),
                 message.getBody(),
+                message.getCreatedAt(),
+                message.isRead(),
                 message.getStatus()
         );
     }

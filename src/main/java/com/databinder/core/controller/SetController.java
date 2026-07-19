@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sets")
+@RequestMapping("/api/sets")
 @RequiredArgsConstructor
 @Tag(name = "Sets", description = "CRUD operations for card sets")
 public class SetController {
