@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/watchlists")
+@RequestMapping("/api/watchlists")
 @RequiredArgsConstructor
 @Tag(name = "Watchlists", description = "Manage user watchlists")
 public class WatchlistController {

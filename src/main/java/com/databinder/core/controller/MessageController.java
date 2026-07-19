@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/messages")
+@RequestMapping("/api/messages")
 @RequiredArgsConstructor
 @Tag(name = "Messages", description = "Manage messages")
 public class MessageController {
@@ -50,12 +50,11 @@ public class MessageController {
         messageService.deleteMessage(messageId);
     }
     
-    @PostMapping("/{messageId}")
-    public MessageResponse updateMessage(@RequestParam Long messageId,
-    									 @RequestParam MessageStatus status, 
-    									 @RequestParam(required = false) Boolean read)
-    {
-    	return messageService.updateMessage(messageId, status, read);
+    @PatchMapping("/{messageId}")
+    public MessageResponse updateMessage(
+            @PathVariable Long messageId,
+            @RequestParam MessageStatus status,
+            @RequestParam(required = false) Boolean read) {
+        return messageService.updateMessage(messageId, status, read);
     }
-    
 }

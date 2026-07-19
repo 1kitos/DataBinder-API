@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/prices")
+@RequestMapping("/api/prices")
 @RequiredArgsConstructor
 @Tag(name = "Prices", description = "Manage price history for printings")
 public class PriceController {
