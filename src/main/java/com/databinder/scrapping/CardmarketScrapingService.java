@@ -1,6 +1,7 @@
 package com.databinder.scrapping;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,9 +15,13 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.LoadState;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
+import com.databinder.scrapping.dtos.ListingFilters;
 import com.databinder.scrapping.parsers.CardmarketPriceParser;
+import com.databinder.scrapping.requests.ListingsRequest;
+import com.databinder.scrapping.responses.CardmarketListingData;
 import com.databinder.scrapping.responses.CardmarketPriceData;
 import com.databinder.scrapping.responses.CardmarketVersionData;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,6 +38,11 @@ public class CardmarketScrapingService {
 
     private final WebClient webClient;
     private final CardmarketPriceParser priceParser;
+    
+    @PostConstruct
+    public void debug() {
+        System.out.println("SCRAPER URL = [" + scraperBaseUrl + "]");
+    }
 
     @Autowired
     public CardmarketScrapingService(CardmarketPriceParser priceParser) {
@@ -57,6 +67,18 @@ public class CardmarketScrapingService {
                 .uri(scraperBaseUrl + "/versions?url=" + url)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CardmarketVersionData>>() {})
+                .block();
+    }
+    
+    public Map<String, List<CardmarketListingData>> fetchListings(
+            ListingsRequest request) {
+
+        return webClient.post()
+                .uri(scraperBaseUrl + "/listings")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<
+                        Map<String, List<CardmarketListingData>>>() {})
                 .block();
     }
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.databinder.core.enums.AlertType;
@@ -37,6 +38,13 @@ public class WatchlistItem {
     private Boolean alertEnabled;
 
     private Boolean alertTriggered;
+    
+    @OneToMany(
+    	    mappedBy = "watchlistItem",
+    	    cascade = CascadeType.ALL,
+    	    orphanRemoval = true
+    	)
+    private List<Listing> listings = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
