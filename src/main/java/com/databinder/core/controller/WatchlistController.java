@@ -1,5 +1,6 @@
 package com.databinder.core.controller;
 
+import com.databinder.core.dto.PriceSnapshotResponse;
 import com.databinder.core.dto.WatchlistItemDetailsResponse;
 import com.databinder.core.dto.WatchlistItemResponse;
 import com.databinder.core.dto.WatchlistResponse;
@@ -85,6 +86,11 @@ public class WatchlistController {
     {
     	
     	return watchlistService.getItemDetailsForWatchlist(id);
+    }
+    
+    @PostMapping("/watchlist-item/{itemId}/fetch")
+    public WatchlistItemResponse fetchListengsAndSave(@PathVariable Long itemId) {
+        return watchlistService.fetchListingMapForItem(itemId);
     }
     
 }

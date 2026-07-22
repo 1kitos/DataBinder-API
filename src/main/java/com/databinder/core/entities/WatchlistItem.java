@@ -6,9 +6,13 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databinder.core.enums.AlertType;
+import com.databinder.core.enums.Language;
+import com.databinder.scrapping.dtos.ListingFilters;
 
 @Entity
 @Table(name = "watchlist_items")
@@ -39,12 +43,11 @@ public class WatchlistItem {
 
     private Boolean alertTriggered;
     
-    @OneToMany(
-    	    mappedBy = "watchlistItem",
-    	    cascade = CascadeType.ALL,
-    	    orphanRemoval = true
-    	)
-    private List<Listing> listings = new ArrayList<>();
+    @Transient
+    private ListingFilters filters;
+    
+    @Transient
+    private Map<Language, List<Listing>> listings = new HashMap<Language, List<Listing>>();
 
     @PrePersist
     protected void onCreate() {

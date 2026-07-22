@@ -143,7 +143,8 @@ public  class ResponseMapper
                 watchlistItem.getAddedAt(),
                 watchlistItem.getAlerts(),
                 watchlistItem.getAlertEnabled(),
-                watchlistItem.getAlertTriggered()
+                watchlistItem.getAlertTriggered(),
+                watchlistItem.getListings()
         );
     }
     

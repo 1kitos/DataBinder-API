@@ -21,29 +21,35 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-class Listing {
+public class Listing {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@Enumerated(EnumType.STRING)
-    private Language language;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private BigDecimal price;
 
     private BigDecimal shipping;
-    
+
     private String sellerName;
+
+    private Boolean professional;
+
+    private Integer sales;
+
+    private Integer availableItems;
+
+    @Enumerated(EnumType.STRING)
+    private Language language;
 
     @Enumerated(EnumType.STRING)
     private Country sellerCountry;
 
     @Enumerated(EnumType.STRING)
     private Condition condition;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "watchlist_item_id", nullable = false)
-    private WatchlistItem watchlistItem;
-    
+
+    private Boolean firstEdition;
+
+    private Integer quantity;
+
 }

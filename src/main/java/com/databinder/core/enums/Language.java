@@ -2,6 +2,7 @@ package com.databinder.core.enums;
 
 public enum Language 
 {
+	ALL(0),
 	EN(1),
 	FR(2),
 	DE(3),
