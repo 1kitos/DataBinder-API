@@ -5,8 +5,12 @@ import lombok.Getter;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
+import com.databinder.core.entities.Listing;
 import com.databinder.core.enums.AlertType;
+import com.databinder.core.enums.Language;
+import com.databinder.scrapping.dtos.ListingFilters;
 
 @Getter
 @AllArgsConstructor
@@ -19,5 +23,9 @@ public class WatchlistItemResponse {
     private Boolean alertEnabled;
 
     private Boolean alertTriggered;
+     
+    private ListingFilters filters;
+    
+    private Map<Language, List<Listing>> listings;
 
 }

@@ -5,9 +5,17 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import com.databinder.core.enums.AlertType;
+import com.databinder.core.enums.Language;
+import com.databinder.scrapping.dtos.ListingFilters;
 
 @Entity
 @Table(name = "watchlist_items")
@@ -37,6 +45,14 @@ public class WatchlistItem {
     private Boolean alertEnabled;
 
     private Boolean alertTriggered;
+    
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private ListingFilters filters = new ListingFilters();
+    
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+	private Map<Language, List<Listing>> listings = new HashMap<Language, List<Listing>>();
 
     @PrePersist
     protected void onCreate() {

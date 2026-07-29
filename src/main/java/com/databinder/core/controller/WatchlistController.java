@@ -1,5 +1,6 @@
 package com.databinder.core.controller;
 
+import com.databinder.core.dto.PriceSnapshotResponse;
 import com.databinder.core.dto.WatchlistItemDetailsResponse;
 import com.databinder.core.dto.WatchlistItemResponse;
 import com.databinder.core.dto.WatchlistResponse;
@@ -77,7 +78,8 @@ public class WatchlistController {
                 id,
                 request.getAlarmsToAdd(),
                 request.getAlarmsToRemove(),
-                request.getAlertEnabled());
+                request.getAlertEnabled(),
+                request.getFilters());
     }
     
     @GetMapping("/watchlist-item/{id}/details")
@@ -85,6 +87,17 @@ public class WatchlistController {
     {
     	
     	return watchlistService.getItemDetailsForWatchlist(id);
+    }
+    
+    @GetMapping("/watchlist-item/{itemId}/detail")
+    public WatchlistItemDetailsResponse getWatchlistItemDetail(
+            @PathVariable Long itemId) {
+        return watchlistService.getItemDetails(itemId);
+    }
+    
+    @PostMapping("/watchlist-item/{itemId}/fetch")
+    public WatchlistItemResponse fetchListengsAndSave(@PathVariable Long itemId) {
+        return watchlistService.fetchListingMapForItem(itemId);
     }
     
 }
