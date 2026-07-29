@@ -2,6 +2,7 @@ package com.databinder.core.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -12,16 +13,23 @@ import com.databinder.core.dto.WatchlistResponse;
 import com.databinder.core.dto.request.WatchlistCreateRequest;
 import com.databinder.core.dto.request.WatchlistItemCreateRequest;
 import com.databinder.core.dto.request.WatchlistUpdateRequest;
+import com.databinder.core.entities.Listing;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.User;
 import com.databinder.core.entities.Watchlist;
 import com.databinder.core.entities.WatchlistItem;
 import com.databinder.core.enums.AlertType;
+import com.databinder.core.enums.Language;
 import com.databinder.core.exception.ResourceNotFoundException;
 import com.databinder.core.mapping.ResponseMapper;
+import com.databinder.core.mapping.ScrapperEntityMapper;
 import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.WatchlistItemRepository;
 import com.databinder.core.repositories.WatchlistRepository;
+import com.databinder.scrapping.CardmarketScrapingService;
+import com.databinder.scrapping.dtos.ListingFilters;
+import com.databinder.scrapping.requests.ListingsRequest;
+import com.databinder.scrapping.responses.CardmarketListingData;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +41,7 @@ public class WatchlistService {
     private final WatchlistItemRepository watchlistItemRepository;
     private final PrintingRepository printingRepository;
     private final AuthenticationService authenticationService;
+    private final CardmarketScrapingService cardmarketScrapingService;
 
     public WatchlistResponse create(WatchlistCreateRequest request) {
 
@@ -140,7 +149,8 @@ public class WatchlistService {
             Long id,
             List<AlertType> alarmsToAdd,
             List<AlertType> alarmsToRemove,
-            Boolean alertEnabled) {
+            Boolean alertEnabled,
+            ListingFilters filters) {
 
         WatchlistItem item = findOwnedWatchlistItem(id);
 
@@ -162,6 +172,8 @@ public class WatchlistService {
         }
 
         item.setAlerts(alerts);
+        
+        item.setFilters(filters);
 
         if (alertEnabled != null) {
             item.setAlertEnabled(alertEnabled);
@@ -214,4 +226,47 @@ public class WatchlistService {
 
         return item;
     }
+    
+    public WatchlistItemResponse fetchListingMapForItem(Long itemId)
+    {
+        User currentUser = authenticationService.getCurrentUser();
+
+        WatchlistItem item = watchlistItemRepository.findById(itemId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Watchlist item not found: " + itemId));
+
+        if (!item.getWatchlist().getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException(
+                    "You do not own this watchlist item.");
+        }
+        
+        ListingsRequest request = new ListingsRequest(item.getPrinting().getPrintingUrl(), item.getFilters());
+
+        
+        Map<String, List<CardmarketListingData>> listingsMap = cardmarketScrapingService.fetchListings(request);
+        
+        item.setListings(ScrapperEntityMapper.toListingMap(listingsMap));
+        
+        return ResponseMapper.toResponse(watchlistItemRepository.save(item));
+    }
+    
+    
+    public WatchlistItemDetailsResponse getItemDetails(Long id) {
+
+        WatchlistItem item = findOwnedWatchlistItem(id);
+
+        return ResponseMapper.toDetailsResponse(item);
+    }
+    
+        
+    
+    
+    
+    
+    
+    
+   
+    
+    
 }

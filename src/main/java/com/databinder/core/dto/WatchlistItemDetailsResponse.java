@@ -1,8 +1,12 @@
 package com.databinder.core.dto;
 
 import java.util.List;
+import java.util.Map;
 
+import com.databinder.core.entities.Listing;
 import com.databinder.core.enums.AlertType;
+import com.databinder.core.enums.Language;
+import com.databinder.scrapping.dtos.ListingFilters;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,8 +28,9 @@ public class WatchlistItemDetailsResponse {
     private Boolean alertTriggered;
 
     private List<AlertType> alerts;
+    
+    private ListingFilters filters;
+    
+    private Map<Language, List<Listing>> listings;
 
-    // mais tarde
-    // private List<PriceSnapshotResponse> snapshots;
-    // private List<MessageResponse> messages;
 }

@@ -143,7 +143,9 @@ public  class ResponseMapper
                 watchlistItem.getAddedAt(),
                 watchlistItem.getAlerts(),
                 watchlistItem.getAlertEnabled(),
-                watchlistItem.getAlertTriggered()
+                watchlistItem.getAlertTriggered(),
+                watchlistItem.getFilters(),
+                watchlistItem.getListings()
         );
     }
     
@@ -156,6 +158,8 @@ public  class ResponseMapper
     	result.setPrinting(ResponseMapper.toDetailsResponse(item.getPrinting()));
     	result.setAlertEnabled(item.getAlertEnabled());
     	result.setAlertTriggered(item.getAlertTriggered());
+    	result.setListings(item.getListings());
+    	result.setFilters(item.getFilters());
     	result.setAlerts(item.getAlerts());
     	
     	return result;

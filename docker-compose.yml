@@ -20,7 +20,6 @@ services:
     networks:
       - databinder-network
 
-
   app:
     build: .
     container_name: spring-app
@@ -43,13 +42,11 @@ services:
     networks:
       - databinder-network
 
-
 volumes:
 
   postgres_data:
     external: true
     name: core_postgres_data
-
 
 networks:
 
