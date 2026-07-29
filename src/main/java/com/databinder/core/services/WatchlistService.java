@@ -27,6 +27,7 @@ import com.databinder.core.repositories.PrintingRepository;
 import com.databinder.core.repositories.WatchlistItemRepository;
 import com.databinder.core.repositories.WatchlistRepository;
 import com.databinder.scrapping.CardmarketScrapingService;
+import com.databinder.scrapping.dtos.ListingFilters;
 import com.databinder.scrapping.requests.ListingsRequest;
 import com.databinder.scrapping.responses.CardmarketListingData;
 
@@ -148,7 +149,8 @@ public class WatchlistService {
             Long id,
             List<AlertType> alarmsToAdd,
             List<AlertType> alarmsToRemove,
-            Boolean alertEnabled) {
+            Boolean alertEnabled,
+            ListingFilters filters) {
 
         WatchlistItem item = findOwnedWatchlistItem(id);
 
@@ -170,6 +172,8 @@ public class WatchlistService {
         }
 
         item.setAlerts(alerts);
+        
+        item.setFilters(filters);
 
         if (alertEnabled != null) {
             item.setAlertEnabled(alertEnabled);
@@ -245,6 +249,14 @@ public class WatchlistService {
         item.setListings(ScrapperEntityMapper.toListingMap(listingsMap));
         
         return ResponseMapper.toResponse(watchlistItemRepository.save(item));
+    }
+    
+    
+    public WatchlistItemDetailsResponse getItemDetails(Long id) {
+
+        WatchlistItem item = findOwnedWatchlistItem(id);
+
+        return ResponseMapper.toDetailsResponse(item);
     }
     
         

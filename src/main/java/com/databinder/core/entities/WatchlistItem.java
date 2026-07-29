@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.databinder.core.enums.AlertType;
 import com.databinder.core.enums.Language;
 import com.databinder.scrapping.dtos.ListingFilters;
@@ -43,11 +46,13 @@ public class WatchlistItem {
 
     private Boolean alertTriggered;
     
-    @Transient
-    private ListingFilters filters;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private ListingFilters filters = new ListingFilters();
     
-    @Transient
-    private Map<Language, List<Listing>> listings = new HashMap<Language, List<Listing>>();
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+	private Map<Language, List<Listing>> listings = new HashMap<Language, List<Listing>>();
 
     @PrePersist
     protected void onCreate() {
