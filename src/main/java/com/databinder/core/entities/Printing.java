@@ -63,4 +63,12 @@ public class Printing {
         
     }
     
+    public void addPriceSnapshot(PriceSnapshot snapshot) {
+        if (priceSnapshots == null) {
+            priceSnapshots = new ArrayList<>();
+        }
+        snapshot.setPrinting(this);
+        priceSnapshots.add(snapshot);
+    }
+    
 }
