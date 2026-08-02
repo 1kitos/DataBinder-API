@@ -49,7 +49,7 @@ public class WatchlistController {
     }
 
     @PostMapping("/{id}/items")
-    public WatchlistResponse addItem(@PathVariable Long id, @Valid @RequestBody WatchlistItemCreateRequest request) {
+    public WatchlistItemResponse addItem(@PathVariable Long id, @Valid @RequestBody WatchlistItemCreateRequest request) {
         return watchlistService.addItem(id, request);
     }
 

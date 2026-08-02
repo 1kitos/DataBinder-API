@@ -98,10 +98,9 @@ public class WatchlistScrapingScheduler {
             }
             
             try {
-            	watchlistService.fetchListingMapForItem(item.getId());
+            	watchlistService.refreshListings(item.getId());
             	log.info("Listings recolhidas com sucesso para watchlistItem {}", item.getId());
-                        	
-            	
+                        	            	
             }catch(Exception e) 
             {
             	 log.error("Falha ao fazer scraping das listings do item {}: {}", item.getId(), e.getMessage());
