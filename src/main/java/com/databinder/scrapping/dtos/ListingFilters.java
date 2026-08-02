@@ -30,4 +30,19 @@ public record ListingFilters(
             10
         );
     }
+    
+    
+    public ListingFilters normalize() {
+        return new ListingFilters(
+                languages != null ? languages : List.of(),
+                excluded_countries != null ? excluded_countries : List.of(),
+                seller_types != null ? seller_types : List.of(),
+                min_condition,
+                is_signed != null ? is_signed : false,
+                is_first_edition != null ? is_first_edition : false,
+                is_altered != null ? is_altered : false,
+                max_listings != null ? max_listings : 10
+        );
+    }
+    
 }

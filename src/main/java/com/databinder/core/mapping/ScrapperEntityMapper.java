@@ -1,6 +1,7 @@
 package com.databinder.core.mapping;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -8,12 +9,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.databinder.core.entities.Listing;
+import com.databinder.core.entities.PriceSnapshot;
+import com.databinder.core.entities.Printing;
 import com.databinder.core.enums.Condition;
 import com.databinder.core.enums.Country;
 import com.databinder.core.enums.Language;
 import com.databinder.scrapping.mapping.LanguageMapper;
 import com.databinder.scrapping.responses.CardmarketListingData;
 import com.databinder.scrapping.responses.CardmarketListingsMap;
+import com.databinder.scrapping.responses.CardmarketPriceData;
 
 public class ScrapperEntityMapper {
 
@@ -55,4 +59,19 @@ public class ScrapperEntityMapper {
 
         return listing;
     }
+    
+    
+    public static PriceSnapshot toPriceSnapshot(CardmarketPriceData data, Printing printing)
+    {
+    	PriceSnapshot result = new PriceSnapshot();
+    	
+    	result.setPrinting(printing);
+    	result.setFromPrice(data.fromPrice());
+    	result.setPriceTrend(data.priceTrend());
+    	result.setCurrency("EUR");
+    	result.setTimestamp(Instant.now());
+    	
+    	return result;
+    }
+    
 }

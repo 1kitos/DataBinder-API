@@ -1,5 +1,6 @@
 package com.databinder.core.services;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.Map;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.databinder.core.dto.PriceSnapshotResponse;
 import com.databinder.core.dto.WatchlistItemDetailsResponse;
 import com.databinder.core.dto.WatchlistItemResponse;
 import com.databinder.core.dto.WatchlistResponse;
@@ -14,6 +16,7 @@ import com.databinder.core.dto.request.WatchlistCreateRequest;
 import com.databinder.core.dto.request.WatchlistItemCreateRequest;
 import com.databinder.core.dto.request.WatchlistUpdateRequest;
 import com.databinder.core.entities.Listing;
+import com.databinder.core.entities.PriceSnapshot;
 import com.databinder.core.entities.Printing;
 import com.databinder.core.entities.User;
 import com.databinder.core.entities.Watchlist;
@@ -30,7 +33,9 @@ import com.databinder.scrapping.CardmarketScrapingService;
 import com.databinder.scrapping.dtos.ListingFilters;
 import com.databinder.scrapping.requests.ListingsRequest;
 import com.databinder.scrapping.responses.CardmarketListingData;
+import com.databinder.scrapping.responses.CardmarketPriceData;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -96,7 +101,7 @@ public class WatchlistService {
                 watchlistRepository.save(watchlist));
     }
 
-    public WatchlistResponse addItem(
+    public WatchlistItemResponse addItem(
             Long watchlistId,
             WatchlistItemCreateRequest request) {
 
@@ -107,25 +112,41 @@ public class WatchlistService {
                         new ResourceNotFoundException(
                                 "Printing not found: " + request.getPrintingId()));
 
-        boolean alreadyExists =
-                watchlistItemRepository.existsByWatchlistIdAndPrintingId(
-                        watchlistId,
-                        request.getPrintingId());
-
-        if (alreadyExists) {
+        if (watchlistItemRepository.existsByWatchlistIdAndPrintingId(
+                watchlistId,
+                request.getPrintingId())) {
             throw new IllegalStateException(
                     "Printing already exists in this watchlist.");
         }
 
+        ListingFilters filters = request.getFilters() != null
+                ? request.getFilters()
+                : new ListingFilters();
+
         WatchlistItem item = new WatchlistItem();
         item.setWatchlist(watchlist);
         item.setPrinting(printing);
+        item.setFilters(filters.normalize());
 
+        // Persist first so the item exists
         watchlistItemRepository.save(item);
 
-        return ResponseMapper.toResponse(watchlist);
-    }
+        // Fetch latest price
+        CardmarketPriceData priceData =
+                cardmarketScrapingService.fetchPrices(printing.getPrintingUrl());
 
+        PriceSnapshot snapshot =
+                ScrapperEntityMapper.toPriceSnapshot(priceData, printing);
+
+        printing.addPriceSnapshot(snapshot);
+        printingRepository.save(printing);
+
+        // Reuse the exact logic that already works
+        fetchListingMapForItem(item.getId());
+
+        return ResponseMapper.toResponse(item);
+    }
+    
     public void removeItem(Long watchlistId, Long itemId) {
 
         WatchlistItem item = findOwnedWatchlistItem(itemId);
@@ -259,6 +280,29 @@ public class WatchlistService {
         return ResponseMapper.toDetailsResponse(item);
     }
     
+    
+    @Transactional
+    public WatchlistItem refreshListings(Long itemId) {
+
+        WatchlistItem item = watchlistItemRepository.findById(itemId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Watchlist item not found: " + itemId));
+
+        ListingsRequest request = new ListingsRequest(
+                item.getPrinting().getPrintingUrl(),
+                item.getFilters()
+        );
+
+        Map<String, List<CardmarketListingData>> listingsMap =
+                cardmarketScrapingService.fetchListings(request);
+
+        item.setListings(
+                ScrapperEntityMapper.toListingMap(listingsMap)
+        );
+
+        return watchlistItemRepository.save(item);
+    }
         
     
     
